@@ -1,0 +1,63 @@
+baseURL = "http://example.com/"
+languageCode = "en-us"
+title = "Aslan Bellmann"
+theme = "minimal"
+disqusShortname = "username" # delete this to disable disqus comments
+googleAnalytics = ""
+
+[params]
+    author = "Aslan Bellmann"
+    description = "The future is now if you're moving on a closed time-like loop."
+    githubUsername = "AslanRB"
+    accent = "black"
+    showBorder = true
+    backgroundColor = "white"
+    font = "Alegreya Sans" # should match the name on Google Fonts!
+    #font = "Raleway" # should match the name on Google Fonts!
+    highlight = true
+    highlightStyle = "default"
+    highlightLanguages = ["r", "python"]
+
+[[menu.main]]
+    url = "/"
+    name = "Home"
+    weight = 1
+    
+[[menu.main]]
+    url = "/post/"
+    name = "Posts"
+    weight = 2
+
+[[menu.main]]
+    url = "/about/"
+    name = "About"
+    weight = 3
+
+# Social icons to be shown on the right-hand side of the navigation bar.
+# The "name" field should match the name of the icon in Font Awesome.
+# The list of available icons can be found at http://fontawesome.io/icons.
+
+[[menu.icon]]
+    url = "mailto:a.bellmann@yahoo.de"
+    name = "envelope-o"
+    weight = 1
+    
+[[menu.icon]]
+    url = "https://twitter.com/aslanbellmann/"
+    name = "twitter"
+    weight = 2
+
+[[menu.icon]]
+    url = "https://github.com/AslanRB/"
+    name = "github"
+    weight = 3
+
+#[[menu.icon]]
+#    url = "https://www.linkedin.com/in/username/"
+#    name = "linkedin"
+#    weight = 4
+#
+#[[menu.icon]]
+#    url = "https://www.stackoverflow.com/username/"
+#    name = "stack-overflow"
+#    weight = 5
