@@ -30,3 +30,2914 @@ Usually most of the information is in the text, and plots are used to highlight 
 |                | Don't Reject       | True negative               | $1-\alpha$   | 'coverage probability'   |
 |$\mu_0 \ne \mu$ | Reject             | True positive               | $1-\beta$    | 'statistical power'      |
 |                | Don't Reject       | False negative error        | $\beta$      |                          |
+
+```{r overview plot 1, fig.height=2.5, fig.width=5}
+set.seed(4)
+
+P = with(density(rnorm(50000, mean=-100, sd=20)), data.frame(x,y))
+S = data.frame(x=rnorm(n=15, mean=100, sd=20), y=rep(0, 15))
+
+ggplot()+
+  # Population
+  geom_area(data=P, aes(x=x, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_segment(aes(x=-100, xend=-100, y=-.002, yend=0.02), size=1, color="navy", linetype="dashed")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=-100, y=-0.003, label="mu", color="navy")+
+  # Sample
+  geom_point(data=S, aes(x=x, y=y), shape=21, size=3, stroke=1.5, color="black", fill="gray85", position=position_jitter(h=0.002))+
+  # CI
+  geom_segment(aes(x=-120, xend=-90, y=-0.015, yend=-0.015), size=1.5, color="darkred")+
+  # Arrows
+  geom_curve(aes(x=-50, xend=50, y=0.015, yend=0.01), size=1, arrow=arrow(length=unit(0.2, "cm")), curvature=-0.1, ncp=10)+
+  geom_curve(aes(x=50, xend=-50, y=-0.01, yend=-0.015), size=1, arrow=arrow(length=unit(0.2, "cm")), curvature=-0.1, ncp=10)+
+  # Text 
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-200, y=0.025, label="'Q: What is the population mean,'~mu~'?'", color="navy")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-200, y=-0.025, label="'A: It is somewhere in the red interval.'", color="darkred")+
+  annotate(geom="text", size=4, hjust=0.5, vjust=0, parse=T, x=-100, y=0.035, label="'POPULATION'")+
+  annotate(geom="text", size=4, hjust=0.5, vjust=0, parse=T, x=80, y=0.035, label="'RANDOM SAMPLE'")+
+  # Dotted Line
+  geom_segment(aes(x=0, xend=0, y=0.04, yend=0.018), size=0.5, linetype="dotted")+
+  geom_segment(aes(x=0, xend=0, y=0.012, yend=-0.012), size=0.5, linetype="dotted")+
+  geom_segment(aes(x=0, xend=0, y=-0.018, yend=-0.03), size=0.5, linetype="dotted")+
+  # Design
+  scale_y_continuous(limits=c(-0.03,0.04), name="")+
+  scale_x_continuous(limits=c(-200,150))+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank())
+```
+
+
+```{r overview plot 2, fig.height=2.5, fig.width=5}
+ggplot()+
+  # Population
+  geom_area(data=P, aes(x=x, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_segment(aes(x=-100, xend=-100, y=-.002, yend=0.02), size=1, color="navy", linetype="dashed")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=-100, y=-0.003, label="mu", color="navy")+
+  # Sample
+  geom_point(data=S, aes(x=x, y=y), shape=21, size=3, stroke=1.5, color="black", fill="gray85", position=position_jitter(h=0.002))+
+  # CI
+  geom_segment(aes(x=-120, xend=-90, y=-0.015, yend=-0.015), size=1.5, color="darkred")+
+  # Arrows
+  geom_curve(aes(x=-50, xend=50, y=0.015, yend=0.01), size=1, arrow=arrow(length=unit(0.2, "cm")), curvature=-0.1, ncp=10)+
+  geom_curve(aes(x=50, xend=-50, y=-0.01, yend=-0.015), size=1, arrow=arrow(length=unit(0.2, "cm")), curvature=-0.1, ncp=10)+
+  # Text 
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-200, y=0.025, label="'Task: Estimate'~mu~'.'", color="navy")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-200, y=-0.016, label="'Result: Interval'", color="darkred")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-200, y=-0.021, label="'of'~bold('non-rejected values')~'for '~mu~'.'", color="darkred")+
+  
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-185, y=0.010, label="~mu~' (mean)'")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-185, y=0.005, label="~sigma~' (stdev)'")+
+  
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=65, y=0.010, label="~m~' (mean)'")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=65, y=0.005, label="~s~'  (stdev)'")+
+  
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-50, y=+0.017, label="'Draw sample of size N.'")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-50, y=-0.022, label="'Narrow down '~mu~' by'")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-50, y=-0.026, label="bold('rejecting values')~'which are'")+
+  annotate(geom="text", size=3, hjust=0, vjust=0, parse=T, x=-50, y=-0.030, label="bold('incompatible')~'with the sample data.'")+
+  
+  annotate(geom="text", size=4, hjust=0.5, vjust=0, parse=T, x=-100, y=0.035, label="'POPULATION'")+
+  annotate(geom="text", size=4, hjust=0.5, vjust=0, parse=T, x=80, y=0.035, label="'RANDOM SAMPLE'")+
+  # Dotted Line
+  geom_segment(aes(x=0, xend=0, y=0.04, yend=0.022), size=0.5, linetype="dotted")+
+  geom_segment(aes(x=0, xend=0, y=0.012, yend=-0.012), size=0.5, linetype="dotted")+
+  # Design
+  scale_y_continuous(limits=c(-0.03,0.04), name="")+
+  scale_x_continuous(limits=c(-200,150))+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title=element_blank())
+
+```
+
+
+```{r sampdist plot, fig.height=4.2, fig.width=5}
+set.seed(5)
+
+mu=100; sigma=10; N=c(5, 15, 50); reps=100000
+
+samdists= rbind(with(density(rnorm(reps,mu,sigma)), data.frame(x,y)),
+                with(density(replicate(n=reps,mean(rnorm(N[1],mu,sigma)))), data.frame(x,y)),
+                with(density(replicate(n=reps,mean(rnorm(N[2],mu,sigma)))), data.frame(x,y)),
+                with(density(replicate(n=reps,mean(rnorm(N[3],mu,sigma)))), data.frame(x,y)))
+
+samdists$l = rep(c("Population", "N = 5", "N = 15", "N = 50"), each=512) #512 is length of density()
+samdists$l = factor(samdists$l, levels=c("N = 50", "N = 15", "N = 5", "Population"))
+
+legend = ggplot()+
+  theme_bw()+
+  theme(axis.title=element_blank(), axis.text=element_blank(), axis.ticks=element_blank(), panel.grid=element_blank())+
+  theme_void()+
+  coord_fixed()+
+  scale_x_continuous(limits=c(0,8))+
+  scale_y_continuous(limits=c(0,6))+
+  annotate("rect", xmin=0, xmax=0.8, ymin=4, ymax=4.8, size=1, alpha=0.2, fill=NA, color="darkorange")+
+  annotate("rect", xmin=0, xmax=0.8, ymin=3, ymax=3.8, size=1, alpha=0.2, fill=NA, color="darkred")+
+  annotate("rect", xmin=0, xmax=0.8, ymin=2, ymax=2.8, size=1, alpha=0.2, fill=NA, color="purple4")+
+  annotate("rect", xmin=0, xmax=0.8, ymin=0, ymax=0.8, size=1, alpha=0.2, fill="gray40", color="black")+
+  
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=4.4, label="N = 50")+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=3.4, label="N = 15")+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=2.4, label="N =  5")+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=0.4, label=expression(paste("Normal (",mu,", ",sigma,")")))+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=3.4, y=3.3, label=expression(paste("Normal (",mu,", ",frac(sigma,sqrt(N)),")")))+
+  
+  geom_segment(size=0.5, linetype="dotted", aes(x=3.3, xend=3.3, y=2, yend=4.8))+
+  
+  annotate("text", hjust=0, vjust=0, size=3, x=0, y=5.1, label=expression(bold("Distributions of m")))+
+  annotate("text", hjust=0, vjust=0, size=3, x=0, y=1, label=expression(bold("Population")))
+
+p.samdists = ggplot(data=samdists, aes(x=x, y=y, color=l, fill=l))+
+  geom_segment(aes(x=mu,xend=mu,y=-0.01,yend=max(samdists$y)), size=1, color="navy", linetype="dashed")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=-0.02, label="mu", color="navy")+
+  geom_area(size=1, alpha=0.2)+
+  scale_fill_manual(values=c(NA,NA,NA,"gray40"), name="") +
+  scale_color_manual(values=c("darkorange","darkred","purple4","black"), name="")+
+  scale_x_continuous(name="Height [cm]", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="Probability Density", limits=c(-0.05,NA))+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")+
+  annotation_custom(ggplotGrob(legend), ymin=0.02, ymax=0.28, xmin=mu-3*sigma, xmax=95)
+
+s1 = data.frame(x=c(rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma)),
+                y=rep(1:5), each=N[1]) #5 samples
+s2 = data.frame(x=c(rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma)),
+                y=rep(1:5), each=N[2])
+s3 = data.frame(x=c(rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma)),
+                y=rep(1:5), each=N[3])
+
+m1 = tapply(s1$x, s1$y, mean); m1 = data.frame(x=m1, y=1:5)
+m2 = tapply(s2$x, s2$y, mean); m2 = data.frame(x=m2, y=1:5)
+m3 = tapply(s3$x, s3$y, mean); m3 = data.frame(x=m3, y=1:5)
+
+p.N1 = ggplot()+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=5.5), color="navy", size=1, linetype="dashed")+
+  geom_point(data=s1, aes(x=x,y=y), shape=21, size=3, color="black", fill="gray85")+
+  geom_point(data=m1, aes(x=x,y=y), shape=22, size=4, color="black", fill="purple4")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=0.4, label="mu", color="navy")+
+  scale_x_continuous(name="", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="Sample #", limit=c(0,5.5), breaks=1:5)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        aspect.ratio=1.2) #sufficient to set for one plot of the row
+
+p.N2 = ggplot()+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=5.5), color="navy", size=1, linetype="dashed")+
+  geom_point(data=s2, aes(x=x,y=y), shape=21, size=3, color="black", fill="gray85")+
+  geom_point(data=m2, aes(x=x,y=y), shape=22, size=4, color="black", fill="darkred")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=0.4, label="mu", color="navy")+
+  scale_x_continuous(name="", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="", limit=c(0,5.5), breaks=1:5)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank())
+
+p.N3 = ggplot()+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=5.5), color="navy", size=1, linetype="dashed")+
+  geom_point(data=s3, aes(x=x,y=y), shape=21, size=3, color="black", fill="gray85")+
+  geom_point(data=m3, aes(x=x,y=y), shape=22, size=4, color="black", fill="darkorange")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=0.4, label="mu", color="navy")+
+  scale_x_continuous(name="", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="", limit=c(0,5.5), breaks=1:5)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank())
+
+(p.N1|p.N2|p.N3) / p.samdists
+```
+
+
+```{r rightsided pvalue plot, fig.height=6.3, fig.width=5}
+set.seed(5)
+mu=100; sigma=10; N=15; reps=100000
+
+sample = data.frame(x=rnorm(N,mu,sigma),y=rep(0,N)) #sample 
+
+popdis = with(density(rnorm(reps,0,sigma)), data.frame(x,y)) #popdis centred on zero
+samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y)) #samdis centred on zero
+
+pvals = c(0.4, 0.15, 0.025) #p values (shaded AUC)
+
+shift = qnorm(pvals,mean(sample$x),sigma/sqrt(N)) #same as using abs of N(0,1) to get z, then do m-z*SEM; (so we shift left; shade AUC above m)
+samdis$x1 = samdis$x + shift[1]
+samdis$x2 = samdis$x + shift[2]
+samdis$x3 = samdis$x + shift[3]
+
+p.pop = ggplot()+
+  geom_area(data=popdis, aes(x=x, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_area(data=samdis, aes(x=x, y=y), size=1, color="darkred", fill=NA)+
+  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+  theme_bw()+
+  scale_x_continuous(limits=c(-30,30), breaks=seq(-20,20,10), name=expression(paste("Distance from ",mu," [cm]")))+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+p.sample = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.p1 = ggplot(data=samdis, aes(x=x1, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x1>mean(sample$x),x1,NA)))+
+  geom_vline(xintercept=shift[1], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  annotate("text", size=3, label=expression(paste("   =  p  =  0.4")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+
+p.p2 = ggplot(data=samdis, aes(x=x2, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x2>mean(sample$x),x2,NA)))+
+  geom_vline(xintercept=shift[2], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  annotate("text", size=3, label=expression(paste("   =  p  =  0.2")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+
+p.p3 = ggplot(data=samdis, aes(x=x3, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x3>mean(sample$x),x3,NA)))+
+  geom_vline(xintercept=shift[3], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  annotate("text", size=3, label=expression(paste("   =  p  =  0.025")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+x = c(seq(70,130,0.05), mean(sample$x))
+p = vector(length=length(x))
+
+for (i in 1:length(x)){
+  p[i] = pnorm(x[i],mean(sample$x),sigma/sqrt(N))
+}
+pcurve.rs = data.frame(x,p)
+
+p.pcurve = ggplot(data=pcurve.rs, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[1], xend=70, y=pvals[1], yend=pvals[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[2], xend=70, y=pvals[2], yend=pvals[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[3], xend=70, y=pvals[3], yend=pvals[3]), color="black")+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.sample / p.p1 / p.p2 / p.p3 / p.pcurve
+
+```
+
+
+```{r leftsided pvalue plot, fig.height=6.3, fig.width=5}
+set.seed(5)
+mu=100; sigma=10; N=15; reps=100000
+
+sample = data.frame(x=rnorm(N,mu,sigma),y=rep(0,N)) #sample 
+
+popdis = with(density(rnorm(reps,0,sigma)), data.frame(x,y)) #popdis centred on zero
+samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y)) #samdis centred on zero
+
+pvals = c(0.4, 0.15, 0.025) #p values (shaded AUC)
+
+shift = qnorm(pvals,mean(sample$x),sigma/sqrt(N)) #same as using abs of N(0,1) to get z, then do m-z*SEM; (so we shift left; shade AUC above m)
+samdis$x1 = samdis$x + shift[1]
+samdis$x2 = samdis$x + shift[2]
+samdis$x3 = samdis$x + shift[3]
+
+p.pop = ggplot()+
+  geom_area(data=popdis, aes(x=x, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_area(data=samdis, aes(x=x, y=y), size=1, color="darkred", fill=NA)+
+  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+  theme_bw()+
+  scale_x_continuous(limits=c(-30,30), breaks=seq(-20,20,10), name=expression(paste("Distance from ",mu," [cm]")))+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+p.sample = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.p1 = ggplot(data=samdis, aes(x=x1, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x1<mean(sample$x),x1,NA)))+
+  geom_vline(xintercept=shift[1], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  annotate("text", size=3, label=expression(paste("   =  p  =  0.6")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+
+p.p2 = ggplot(data=samdis, aes(x=x2, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x2<mean(sample$x),x2,NA)))+
+  geom_vline(xintercept=shift[2], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  annotate("text", size=3, label=expression(paste("   =  p  =  0.8")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+
+p.p3 = ggplot(data=samdis, aes(x=x3, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x3<mean(sample$x),x3,NA)))+
+  geom_vline(xintercept=shift[3], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  annotate("text", size=3, label=expression(paste("   =  p  =  0.975")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+x = c(seq(70,130,0.05), mean(sample$x))
+p = vector(length=length(x))
+
+for (i in 1:length(x)){
+  p[i] = pnorm(-x[i],-mean(sample$x),sigma/sqrt(N))
+}
+pcurve.ls = data.frame(x,p)
+
+p.pcurve = ggplot(data=pcurve.ls, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[1], xend=70, y=1-pvals[1], yend=1-pvals[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[2], xend=70, y=1-pvals[2], yend=1-pvals[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[3], xend=70, y=1-pvals[3], yend=1-pvals[3]), color="black")+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.sample / p.p1 / p.p2 / p.p3 / p.pcurve
+
+```
+
+
+```{r twosided pvalue plot, fig.height=6.3, fig.width=5}
+set.seed(5)
+mu=100; sigma=10; N=15; reps=100000
+
+sample = data.frame(x=rnorm(N,mu,sigma),y=rep(0,N)) #sample 
+
+popdis = with(density(rnorm(reps,0,sigma)), data.frame(x,y)) #popdis centred on zero
+samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y)) #samdis centred on zero
+
+pvals = c(0.8, 0.3, 0.05) #p values (shaded AUC)
+
+shift = qnorm(pvals/2,mean(sample$x),sigma/sqrt(N)) #same as using abs of N(0,1) to get z, then do m-z*SEM; (so we shift left; shade AUC above m)
+samdis$x1 = samdis$x + shift[1]
+samdis$x2 = samdis$x + shift[2]
+samdis$x3 = samdis$x + shift[3]
+
+p.pop = ggplot()+
+  geom_area(data=popdis, aes(x=x, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_area(data=samdis, aes(x=x, y=y), size=1, color="darkred", fill=NA)+
+  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+  theme_bw()+
+  scale_x_continuous(limits=c(-30,30), breaks=seq(-20,20,10), name=expression(paste("Distance from ",mu," [cm]")))+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+p.sample = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.p1 = ggplot(data=samdis, aes(x=x1, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x1>mean(sample$x),x1,NA)))+
+  geom_vline(xintercept=shift[1], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  #annotate("text", size=3, label=expression(paste("   =  ",frac(p,2),"  =  0.4 .... p  =  0.8")), hjust=0, vjust=0.5, x=112, y=0.08)
+  annotate("text", size=3, label=expression(paste("  * 2  =  p  =  0.8")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+
+p.p2 = ggplot(data=samdis, aes(x=x2, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x2>mean(sample$x),x2,NA)))+
+  geom_vline(xintercept=shift[2], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  #annotate("text", size=3, label=expression(paste("   =  ",frac(p,2),"  =  0.15 .... p  =  0.3")), hjust=0, vjust=0.5, x=112, y=0.08)
+  annotate("text", size=3, label=expression(paste("  * 2  =  p  =  0.3")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+
+p.p3 = ggplot(data=samdis, aes(x=x3, y=y))+
+  geom_area(size=1, color="darkred", fill=NA)+
+  geom_area(size=1, color=NA, fill="darkred", alpha=0.4, aes(x=ifelse(x3>mean(sample$x),x3,NA)))+
+  geom_vline(xintercept=shift[3], color="navy", linetype="dashed")+
+  geom_vline(xintercept=mean(sample$x))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=110, xmax=112, ymin=0.06, ymax=0.10)+
+  #annotate("text", size=3, label=expression(paste("   =  ",frac(p,2),"  =  0.025 .... p  =  0.05")), hjust=0, vjust=0.5, x=112, y=0.08)
+  annotate("text", size=3, label=expression(paste("  * 2  =  p  =  0.05")), hjust=0, vjust=0.5, x=112, y=0.08)
+
+x = c(seq(70,130,0.05), mean(sample$x))
+p = vector(length=length(x))
+
+for (i in 1:length(x)){
+  if (x[i] < mean(sample$x)){
+    p[i] = pnorm(x[i],mean(sample$x),sigma/sqrt(N)) * 2}
+  else {
+    p[i] = (1 - pnorm(x[i],mean(sample$x),sigma/sqrt(N))) * 2}
+}
+pcurve.2s = data.frame(x,p)
+
+p.pcurve = ggplot(data=pcurve.2s, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[1], xend=70, y=pvals[1], yend=pvals[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[2], xend=70, y=pvals[2], yend=pvals[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=shift[3], xend=70, y=pvals[3], yend=pvals[3]), color="black")+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.sample / p.p1 / p.p2 / p.p3 / p.pcurve
+
+```
+
+
+```{r rightsided alpha plot, fig.height=5, fig.width=5}
+alpha = 0.05
+shift = qnorm(alpha,mean(sample$x),sigma/sqrt(N))
+
+samdis$xl = samdis$x + shift # left samdis
+
+shiftup = max(samdis$y)*1.25
+samdis$yl = samdis$y + shiftup 
+
+p.sample = p.sample+
+  theme(axis.title.x=element_blank())
+
+p.ci = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xl, ymin=shiftup*1, ymax=yl), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xl>mean(sample$x),xl,NA), ymin=shiftup*1, ymax=yl), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=mean(sample$x))+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift, xend=shift, y=max(samdis$yl), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+
+  # CI & Point Estimate
+  geom_segment(aes(x=shift, xend=130, y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=mean(sample$x), y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve = ggplot(data=pcurve.rs, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift, xend=130, y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=mean(sample$x), y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.sample / p.ci / p.cipcurve
+```
+
+
+```{r leftsided alpha plot, fig.height=5, fig.width=5}
+alpha = 0.05
+shift = qnorm(1-alpha,mean(sample$x),sigma/sqrt(N))
+
+samdis$xr = samdis$x + shift # left samdis
+
+shiftup = max(samdis$y)*1.25
+samdis$yr = samdis$y + shiftup 
+
+p.sample = p.sample+
+  theme(axis.title.x=element_blank())
+
+p.ci = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xr, ymin=shiftup*1, ymax=yr), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xr<mean(sample$x),xr,NA), ymin=shiftup*1, ymax=yr), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=mean(sample$x))+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift, xend=shift, y=max(samdis$yr), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+
+  # CI & Point Estimate
+  geom_segment(aes(x=shift, xend=70, y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=mean(sample$x), y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve = ggplot(data=pcurve.ls, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift, xend=70, y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=mean(sample$x), y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.sample / p.ci / p.cipcurve
+```
+
+
+```{r twosided alpha plot, fig.height=5.5, fig.width=5}
+alpha = 0.05
+shift = qnorm(c(alpha/2, 1-alpha/2),mean(sample$x),sigma/sqrt(N))
+
+samdis$xl = samdis$x + shift[1] # left samdis
+samdis$xr = samdis$x + shift[2] # right samdis
+
+shiftup = max(samdis$y)*1.25
+samdis$yl = samdis$y + shiftup*2 # CI, right samdis, left samdis are spaced 1.25 * (height of samdis) on y
+samdis$yr = samdis$y + shiftup   # ... i.e. the two samdis are spaced 0.25 * (height of samdis) on y
+
+p.sample = p.sample+
+  theme(axis.title.x=element_blank())
+
+p.ci = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xl, ymin=shiftup*2, ymax=yl), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xl>mean(sample$x),xl,NA), ymin=shiftup*2, ymax=yl), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Right sampling distribution and area
+  geom_ribbon(aes(x=xr, ymin=shiftup, ymax=yr), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xr<mean(sample$x),xr,NA), ymin=shiftup, ymax=yr), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=mean(sample$x))+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift[1], xend=shift[1], y=max(samdis$yl), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #left
+  geom_segment(aes(x=shift[2], xend=shift[2], y=max(samdis$yr), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #right
+  # CI & Point Estimate
+  geom_segment(aes(x=shift[1], xend=shift[2], y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=mean(sample$x), y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05 .... ",frac(alpha,2),"  =  0.025  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  annotate("rect", size=1, color="darkred", fill="darkred", alpha=0.4, xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(".... ",frac(alpha,2),"  =  0.025  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve = ggplot(data=pcurve.2s, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift[1], xend=shift[2], y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=mean(sample$x), y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.sample / p.ci / p.cipcurve
+```
+
+
+```{r rightsided beta plot, fig.height=7.5, fig.width=5}
+h0 = 100
+alpha = 0.05
+beta  = c(0.7, 0.3, 0.05)
+
+x.reject = h0 + abs(qnorm(alpha,0,1))*sigma/sqrt(N) #values that would lead to h0 rejection
+#x.valofi = x.reject[2] +  abs(qnorm(beta,0,1))*sigma/sqrt(N)  #value of interest (with 1-beta power)
+
+x.valofi = vector(length=length(beta)) #value of interest (with 1-beta power)
+
+for(i in 1:length(beta)){
+  
+  if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject + abs(qnorm(beta[i],0,1))*sigma/sqrt(N)
+  }else{
+    x.valofi[i] = x.reject - abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)
+  }
+}
+
+#samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y))
+samdis = data.frame(x=samdis$x, y=samdis$y)
+samdis$x0 = samdis$x + h0
+samdis$x1 = samdis$x + x.valofi[1]
+samdis$x2 = samdis$x + x.valofi[2]
+samdis$x3 = samdis$x + x.valofi[3]
+
+shiftup = max(samdis$y)*1.25
+samdis$y0 = samdis$y + shiftup*3
+samdis$y1 = samdis$y + shiftup*2
+samdis$y2 = samdis$y + shiftup*1
+samdis$y3 = samdis$y
+
+  
+p.beta = ggplot(data=samdis)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*3), color="darkred", fill="white", size=1, alpha=1)+
+  ##geom_ribbon(aes(x=ifelse(x0<x.reject,x0,NA), ymax=y0, ymin=shiftup*3), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject,x0,NA), ymax=y0, ymin=shiftup*3), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*2), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1<x.reject,x1,NA), ymax=y1, ymin=shiftup*2), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2<x.reject,x2,NA), ymax=y2, ymin=shiftup*1), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis$y2), yend=-.05))+
+  # 4th Layer
+  geom_ribbon(aes(x=x3, ymax=y3, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x3<x.reject,x3,NA), ymax=y3, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[3], xend=x.valofi[3], y=max(samdis$y3), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(mu[0]), size=4, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(mu[1]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(mu[2]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  annotate("text", label=expression(mu[3]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[3], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=3*shiftup+0.06, ymax=3*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=3*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[1]," ....")), hjust=0, vjust=0.5, x=70, y=2*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.70  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[2]," ....")), hjust=0, vjust=0.5, x=70, y=1*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.30  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[3]," ....")), hjust=0, vjust=0.5, x=70, y=0*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  
+  ggtitle(expression(paste("H0: ",mu<=100," (i.e. ",mu[0],"),  ","H1: ",mu>100," (e.g. ",mu[1],", ",mu[2],", ",mu[3],")")))+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(title=element_text(size=7),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$y0)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+x = seq(70,130,0.1)
+b = vector(length=length(x))
+
+for(i in 1:length(x)){
+  b[i] = pnorm(x.reject, x[i], sigma/sqrt(N))
+}
+
+betacurve = data.frame(x, b)
+powacurve = data.frame(x, pow=1-b)
+
+p.betacurve = ggplot(betacurve, aes(x=x, y=b))+
+  # beta curve
+  geom_line(size=1, color="dodgerblue", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=1-alpha)+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=beta[1], yend=beta[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=beta[2], yend=beta[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[3], xend=70, y=beta[3], yend=beta[3]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(1-alpha,"  =  0.95")), hjust=0, vjust=1, x=70, y=1-alpha-0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Non-Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(beta,"   or   ",1-alpha)))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.powercurve = ggplot(powacurve, aes(x=x, y=pow))+
+  # power curve
+  geom_line(size=1, color="black", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=1-beta[1], yend=1-beta[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=1-beta[2], yend=1-beta[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[3], xend=70, y=1-beta[3], yend=1-beta[3]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(1-beta,"   or   ",alpha)))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.beta / p.betacurve / p.powercurve
+```
+
+
+```{r leftsided beta plot, fig.height=7.5, fig.width=5}
+h0 = 100
+alpha = 0.05
+beta  = c(0.7, 0.3, 0.05)
+
+x.reject = h0 - abs(qnorm(alpha,0,1))*sigma/sqrt(N) #values that would lead to h0 rejection
+#x.valofi = x.reject[2] +  abs(qnorm(beta,0,1))*sigma/sqrt(N)  #value of interest (with 1-beta power)
+
+x.valofi = vector(length=length(beta)) #value of interest (with 1-beta power)
+
+for(i in 1:length(beta)){
+  
+  if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject - abs(qnorm(beta[i],0,1))*sigma/sqrt(N)
+  }else{
+    x.valofi[i] = x.reject + abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)
+  }
+}
+
+#samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y))
+samdis = data.frame(x=samdis$x, y=samdis$y)
+samdis$x0 = samdis$x + h0
+samdis$x1 = samdis$x + x.valofi[1]
+samdis$x2 = samdis$x + x.valofi[2]
+samdis$x3 = samdis$x + x.valofi[3]
+
+shiftup = max(samdis$y)*1.25
+samdis$y0 = samdis$y + shiftup*3
+samdis$y1 = samdis$y + shiftup*2
+samdis$y2 = samdis$y + shiftup*1
+samdis$y3 = samdis$y
+
+  
+p.beta = ggplot(data=samdis)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*3), color="darkred", fill="white", size=1, alpha=1)+
+  ##geom_ribbon(aes(x=ifelse(x0<x.reject,x0,NA), ymax=y0, ymin=shiftup*3), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject,x0,NA), ymax=y0, ymin=shiftup*3), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*2), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject,x1,NA), ymax=y1, ymin=shiftup*2), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject,x2,NA), ymax=y2, ymin=shiftup*1), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis$y2), yend=-.05))+
+  # 4th Layer
+  geom_ribbon(aes(x=x3, ymax=y3, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x3>x.reject,x3,NA), ymax=y3, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[3], xend=x.valofi[3], y=max(samdis$y3), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(mu[0]), size=4, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(mu[1]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(mu[2]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  annotate("text", label=expression(mu[3]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[3], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=3*shiftup+0.06, ymax=3*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=3*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[1]," ....")), hjust=0, vjust=0.5, x=70, y=2*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.70  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[2]," ....")), hjust=0, vjust=0.5, x=70, y=1*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.30  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[3]," ....")), hjust=0, vjust=0.5, x=70, y=0*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  
+  ggtitle(expression(paste("H0: ",mu>=100," (i.e. ",mu[0],"),  ","H1: ",mu<100," (e.g. ",mu[1],", ",mu[2],", ",mu[3],")")))+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(title=element_text(size=7),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$y0)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+x = seq(70,130,0.1)
+b = vector(length=length(x))
+
+for(i in 1:length(x)){
+  b[i] = pnorm(-x.reject, -x[i], sigma/sqrt(N))
+}
+
+betacurve = data.frame(x, b)
+powacurve = data.frame(x, pow=1-b)
+
+p.betacurve = ggplot(betacurve, aes(x=x, y=b))+
+  # beta curve
+  geom_line(size=1, color="dodgerblue", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=1-alpha)+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=beta[1], yend=beta[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=beta[2], yend=beta[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[3], xend=70, y=beta[3], yend=beta[3]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(1-alpha,"  =  0.95")), hjust=0, vjust=1, x=70, y=1-alpha-0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Non-Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(beta,"   or   ",1-alpha)))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.powercurve = ggplot(powacurve, aes(x=x, y=pow))+
+  # power curve
+  geom_line(size=1, color="black", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=1-beta[1], yend=1-beta[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=1-beta[2], yend=1-beta[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[3], xend=70, y=1-beta[3], yend=1-beta[3]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(1-beta,"   or   ",alpha)))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.beta / p.betacurve / p.powercurve
+```
+
+
+```{r twosided beta plot, fig.height=7.5, fig.width=5}
+h0 = 100
+alpha = 0.05
+beta  = c(0.7, 0.3, 0.05)
+
+x.reject = h0 + c(-1,1) * abs(qnorm(alpha/2,0,1))*sigma/sqrt(N) #values that would lead to h0 rejection
+#x.valofi = x.reject[2] +  abs(qnorm(beta,0,1))*sigma/sqrt(N)  #value of interest (with 1-beta power)
+
+x.valofi = vector(length=length(beta)) #value of interest (with 1-beta power)
+side = c(1,0,1) #0 for left side, 1 for right side
+
+
+for(i in 1:length(beta)){
+  
+  if(side[i]==1){
+    
+    if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject[2] + abs(qnorm(beta[i],0,1))*sigma/sqrt(N)}
+    
+    else{
+    x.valofi[i] = x.reject[2] - abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)}}
+  
+  else if (side[i]==0){
+    
+    if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject[1] - abs(qnorm(beta[i],0,1))*sigma/sqrt(N)}
+    
+    else{
+    x.valofi[i] = x.reject[1] + abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)}}}
+  
+
+samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y))
+samdis = data.frame(x=samdis$x, y=samdis$y)
+samdis$x0 = samdis$x + h0
+samdis$x1 = samdis$x + x.valofi[1]
+samdis$x2 = samdis$x + x.valofi[2]
+samdis$x3 = samdis$x + x.valofi[3]
+
+shiftup = max(samdis$y)*1.25
+samdis$y0 = samdis$y + shiftup*3
+samdis$y1 = samdis$y + shiftup*2
+samdis$y2 = samdis$y + shiftup*1
+samdis$y3 = samdis$y
+
+  
+p.beta = ggplot(data=samdis)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*3), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject[1],x0,NA), ymax=y0, ymin=shiftup*3), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject[2],x0,NA), ymax=y0, ymin=shiftup*3), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*2), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject[1] & x1<x.reject[2],x1,NA), ymax=y1, ymin=shiftup*2), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject[1] & x2<x.reject[2],x2,NA), ymax=y2, ymin=shiftup*1), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis$y2), yend=-.05))+
+  # 4th Layer
+  geom_ribbon(aes(x=x3, ymax=y3, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x3>x.reject[1] & x3<x.reject[2],x3,NA), ymax=y3, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[3], xend=x.valofi[3], y=max(samdis$y3), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(mu[0]), size=4, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(mu[1]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(mu[2]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  annotate("text", label=expression(mu[3]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[3], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=3*shiftup+0.06, ymax=3*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=3*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[1]," ....")), hjust=0, vjust=0.5, x=70, y=2*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.70  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[2]," ....")), hjust=0, vjust=0.5, x=70, y=1*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.30  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste("If ",mu," = ",mu[3]," ....")), hjust=0, vjust=0.5, x=70, y=0*shiftup+0.08)+
+  annotate("text", size=3, label=expression(paste(".... ",beta,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  
+  ggtitle(expression(paste("H0: ",mu==100," (i.e. ",mu[0],"),  ","H1: ",mu!=100," (e.g. ",mu[1],", ",mu[2],", ",mu[3],")")))+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(title=element_text(size=7),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$y0)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+x = seq(70,130,0.1)
+b = vector(length=length(x))
+
+for(i in 1:length(x)){
+  
+  if(x[i] >= h0){
+    auc.upper = pnorm(x.reject[2], x[i], sigma/sqrt(N))
+    auc.lower = pnorm(x.reject[1], x[i], sigma/sqrt(N))
+    b[i] = auc.upper - auc.lower
+  }else{
+    auc.upper = pnorm(-x.reject[2], -x[i], sigma/sqrt(N))
+    auc.lower = pnorm(-x.reject[1], -x[i], sigma/sqrt(N))
+    b[i] = auc.lower - auc.upper
+  }
+}
+
+betacurve = data.frame(x, b)
+powacurve = data.frame(x, pow=1-b)
+
+p.betacurve = ggplot(betacurve, aes(x=x, y=b))+
+  # beta curve
+  geom_line(size=1, color="dodgerblue", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=1-alpha)+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=beta[1], yend=beta[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=beta[2], yend=beta[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[3], xend=70, y=beta[3], yend=beta[3]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(1-alpha,"  =  0.95")), hjust=0, vjust=1, x=70, y=1-alpha-0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Non-Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(beta,"   or   ",1-alpha)))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.powercurve = ggplot(powacurve, aes(x=x, y=pow))+
+  # power curve
+  geom_line(size=1, color="black", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=1-beta[1], yend=1-beta[1]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=1-beta[2], yend=1-beta[2]), color="black")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[3], xend=70, y=1-beta[3], yend=1-beta[3]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(1-beta,"   or   ",alpha)))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.pop / p.beta / p.betacurve / p.powercurve
+```
+
+
+```{r rightsided inference plot, fig.height=4.2, fig.width=5}
+h0 = 100
+alpha = 0.05
+beta  = alpha
+
+x.reject = h0 + abs(qnorm(alpha,0,1))*sigma/sqrt(N) #values that would lead to h0 rejection
+
+x.valofi = vector(length=length(beta)) #value of interest (with 1-beta power)
+
+for(i in 1:length(beta)){
+  
+  if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject + abs(qnorm(beta[i],0,1))*sigma/sqrt(N)}
+  else{
+    x.valofi[i] = x.reject - abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)}}
+
+
+#samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y))
+samdis = data.frame(x=samdis$x, y=samdis$y)
+samdis$x0 = samdis$x + h0
+samdis$x1 = samdis$x + x.valofi
+
+shiftup = max(samdis$y)*1.25
+samdis$y0 = samdis$y + shiftup*1
+samdis$y1 = samdis$y
+  
+p.beta = ggplot(data=samdis)+
+  # H0
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject,x0,NA), ymax=y0, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis$y0), yend=-.05))+
+  # H1
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1<x.reject,x1,NA), ymax=y1, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis$y1), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(mu[0]), size=4, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(mu[1]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi, y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(beta,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  
+  ggtitle(expression(paste("H0: ",mu<=100," (i.e. ",mu[0],"),  ","H1: ",mu>100," (e.g. ",mu[1],")")))+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(plot.title=element_text(size=8),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$y0)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+pe <- function(p){x=abs(qnorm(p,0,1))*(10/sqrt(15)); return(x)}
+
+scenarios = data.frame(x = c(pe(0.02),pe(0.15))+h0,
+                       y = rep(0,2),
+                       s = c("A","B"))
+
+p.1 = scenarios %>% filter(s=="A") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x-pe(alpha), xend=124, y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(A)))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.02))
+
+p.2 = scenarios %>% filter(s=="B") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x-pe(alpha), xend=124, y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(B)))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.15))
+
+p.pop / p.beta / p.1 / p.2
+```
+
+
+```{r leftsided inference plot, fig.height=4.2, fig.width=5}
+h0 = 100
+alpha = 0.05
+beta  = alpha
+
+x.reject = h0 - abs(qnorm(alpha,0,1))*sigma/sqrt(N) #values that would lead to h0 rejection
+
+x.valofi = vector(length=length(beta)) #value of interest (with 1-beta power)
+
+for(i in 1:length(beta)){
+  
+  if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject - abs(qnorm(beta[i],0,1))*sigma/sqrt(N)}
+  else{
+    x.valofi[i] = x.reject + abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)}}
+
+
+#samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y))
+samdis = data.frame(x=samdis$x, y=samdis$y)
+samdis$x0 = samdis$x + h0
+samdis$x1 = samdis$x + x.valofi
+
+shiftup = max(samdis$y)*1.25
+samdis$y0 = samdis$y + shiftup*1
+samdis$y1 = samdis$y
+  
+p.beta = ggplot(data=samdis)+
+  # H0
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject,x0,NA), ymax=y0, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis$y0), yend=-.05))+
+  # H1
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject,x1,NA), ymax=y1, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis$y1), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(mu[0]), size=4, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(mu[1]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi, y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(beta,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  
+  ggtitle(expression(paste("H0: ",mu>=100," (i.e. ",mu[0],"),  ","H1: ",mu<100," (e.g. ",mu[1],")")))+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(plot.title=element_text(size=8),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$y0)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+pe <- function(p){x=abs(qnorm(p,0,1))*(10/sqrt(15)); return(x)}
+
+scenarios = data.frame(x = c(-pe(0.02),-pe(0.15))+h0,
+                       y = rep(0,2),
+                       s = c("A","B"))
+
+p.1 = scenarios %>% filter(s=="A") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x+pe(alpha), xend=72, y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(A)))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.02))
+
+p.2 = scenarios %>% filter(s=="B") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x+pe(alpha), xend=72, y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(B)))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.15))
+
+p.pop / p.beta / p.1 / p.2
+```
+
+
+```{r twosided inference plot, fig.height=5, fig.width=5}
+h0 = 100
+alpha = 0.05
+beta  = rep(alpha,2)
+
+x.reject = h0 + c(-1,1) * abs(qnorm(alpha/2,0,1))*sigma/sqrt(N) #values that would lead to h0 rejection
+
+x.valofi = vector(length=length(beta)) #value of interest (with 1-beta power)
+side = c(0,1) #0 for left side, 1 for right side
+
+
+for(i in 1:length(beta)){
+  
+  if(side[i]==1){
+    
+    if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject[2] + abs(qnorm(beta[i],0,1))*sigma/sqrt(N)}
+    else{
+    x.valofi[i] = x.reject[2] - abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)}}
+  
+  else if (side[i]==0){
+    
+    if(beta[i] <= 0.5){
+    x.valofi[i] = x.reject[1] - abs(qnorm(beta[i],0,1))*sigma/sqrt(N)}
+    else{
+    x.valofi[i] = x.reject[1] + abs(qnorm(1-beta[i],0,1))*sigma/sqrt(N)}}}
+  
+
+samdis = with(density(rnorm(reps,0,sigma/sqrt(N))), data.frame(x,y))
+samdis = data.frame(x=samdis$x, y=samdis$y)
+samdis$x0 = samdis$x + h0
+samdis$x1 = samdis$x + x.valofi[1]
+samdis$x2 = samdis$x + x.valofi[2]
+
+shiftup = max(samdis$y)*1.25
+samdis$y0 = samdis$y + shiftup*1
+samdis$y1 = samdis$y
+samdis$y2 = samdis$y
+
+  
+p.beta = ggplot(data=samdis)+
+  # H0
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject[1],x0,NA), ymax=y0, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject[2],x0,NA), ymax=y0, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis$y0), yend=-.05))+
+  # H1 w/ low beta left
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject[1] & x1<x.reject[2],x1,NA), ymax=y1, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis$y1), yend=-.05))+
+  # H1 w/ low beta right
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject[1] & x2<x.reject[2],x2,NA), ymax=y2, ymin=shiftup*0), color=NA, fill="dodgerblue", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis$y2), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(mu[0]), size=4, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(mu[1]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(mu[2]), size=4, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="dodgerblue", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(beta,"  =  0.05  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  
+  ggtitle(expression(paste("H0: ",mu==100," (i.e. ",mu[0],"),  ","H1: ",mu!=100," (e.g. ",mu[1],", ",mu[2],")")))+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(plot.title=element_text(size=8),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$y0)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+pe <- function(p){x=abs(qnorm(p/2,0,1))*(10/sqrt(15)); return(x)}
+
+scenarios = data.frame(x = c(pe(0.02),-pe(0.04),pe(0.15),-pe(0.06))+h0,
+                       y = rep(0,4),
+                       s = c("A1","A2","B1","B2"))
+
+p.1 = scenarios %>% filter(s=="A1") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x-pe(alpha), xend=x+pe(alpha), y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(A[1])))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.02))
+
+p.2 = scenarios %>% filter(s=="A2") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x-pe(alpha), xend=x+pe(alpha), y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(A[2])))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.04))
+
+p.3 = scenarios %>% filter(s=="B1") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x-pe(alpha), xend=x+pe(alpha), y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(B[1])))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.15))
+
+p.4 = scenarios %>% filter(s=="B2") %>%
+  ggplot(aes(x=x, y=y))+
+  geom_vline(xintercept=x.reject, size=0.5, color="black")+
+  geom_vline(xintercept=h0, size=0.5, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, size=0.5, color="navy", linetype="dashed")+
+  geom_segment(aes(x=x-pe(alpha), xend=x+pe(alpha), y=y, yend=y), color="darkred", size=1.5)+
+  geom_point(size=4, shape=22, color="darkred", fill="darkred")+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-1,1))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        aspect.ratio=0.05)+
+  annotate("text", size=4, hjust=0, vjust=0.5, x=70, y=0, label=expression(bold(B[2])))+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=130, y=0, label=expression(p==0.06))
+
+p.pop / p.beta / p.1 / p.2 / p.3 / p.4
+```
+
+
+```{r power vs N, fig.height=5.7, fig.width=5}
+h0 = 100; x = seq(70,130,0.1); b1 = vector(length=length(x)); b2=b1; x.valofi = c(107,112)
+
+N = c(5,15)
+alpha = c(0.05,0.05)
+sigma = c(10,10)
+
+# Values that would lead to h0 rejection.
+x.reject1 = h0 + c(-1,1) * abs(qnorm(alpha[1]/2,0,1))*sigma[1]/sqrt(N[1])
+x.reject2 = h0 + c(-1,1) * abs(qnorm(alpha[2]/2,0,1))*sigma[2]/sqrt(N[2])
+
+# Power.
+for(i in 1:length(x)){
+  
+  if(x[i] >= h0){
+    auc.upper1 = pnorm(x.reject1[2], x[i], sigma/sqrt(N[1]))
+    auc.lower1 = pnorm(x.reject1[1], x[i], sigma/sqrt(N[1]))
+    b1[i] = auc.upper1 - auc.lower1
+    auc.upper2 = pnorm(x.reject2[2], x[i], sigma/sqrt(N[2]))
+    auc.lower2 = pnorm(x.reject2[1], x[i], sigma/sqrt(N[2]))
+    b2[i] = auc.upper2 - auc.lower2
+  }else{
+    auc.upper1 = pnorm(-x.reject1[2], -x[i], sigma/sqrt(N[1]))
+    auc.lower1 = pnorm(-x.reject1[1], -x[i], sigma/sqrt(N[1]))
+    b1[i] = auc.lower1 - auc.upper1
+    auc.upper2 = pnorm(-x.reject2[2], -x[i], sigma/sqrt(N[2]))
+    auc.lower2 = pnorm(-x.reject2[1], -x[i], sigma/sqrt(N[2]))
+    b2[i] = auc.lower2 - auc.upper2}}
+
+powacurve = data.frame(x, pow1=1-b1, pow2=1-b2)
+
+# Power for values of interest.
+power1    = powacurve$pow1[powacurve$x==x.valofi[1]]
+power1[2] = powacurve$pow1[powacurve$x==x.valofi[2]]
+power2    = powacurve$pow2[powacurve$x==x.valofi[1]]
+power2[2] = powacurve$pow2[powacurve$x==x.valofi[2]]
+
+# Sampling distributions over h0 and values of interest.
+samdis1 = with(density(rnorm(reps,0,sigma[1]/sqrt(N[1]))), data.frame(x,y))
+samdis2 = with(density(rnorm(reps,0,sigma[2]/sqrt(N[2]))), data.frame(x,y))
+samdis1 = samdis1 %>%
+  mutate(x0=x+h0, x1=x+x.valofi[1], x2=x+x.valofi[2])
+samdis2 = samdis2 %>%
+  mutate(x0=x+h0, x1=x+x.valofi[1], x2=x+x.valofi[2])
+
+# Vertical shift for sampling distributions. 
+shiftup = max(c(samdis1$y,samdis2$y))*1.25
+samdis1 = samdis1 %>%
+  mutate(y0=y+shiftup*2, y1=y+shiftup*1, y2=y)
+samdis2 = samdis2 %>%
+  mutate(y0=y+shiftup*2, y1=y+shiftup*1, y2=y)
+
+
+p.dists1 = ggplot(data=samdis1)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*2), color="purple4", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject1[1],x0,0), ymax=y0, ymin=shiftup*2), color=NA, fill="purple4", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject1[2],x0,0), ymax=y0, ymin=shiftup*2), color=NA, fill="purple4", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis1$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*1), color="purple4", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1<x.reject1[1],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="purple4", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject1[2],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="purple4", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis1$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*0), color="purple4", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2<x.reject1[1],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="purple4", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject1[2],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="purple4", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis1$y2), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject1, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(100), size=3, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(107), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(112), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="purple4", fill="purple4", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="purple4", fill="purple4", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="purple4", fill="purple4", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,max(samdis2$y0)), name="")+
+  # design
+  theme_bw()+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis1$y0)/max(samdis2$y)*0.1)+ 
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.14, label=expression(paste("H0: ",mu==100,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.07, label=expression(paste(sigma==10,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.00, label=expression(paste(alpha==0.05)), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=-0.07, label=expression(paste(N==5)), color="black")
+
+p.dists2 = ggplot(data=samdis2)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*2), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject2[1],x0,NA), ymax=y0, ymin=shiftup*2), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject2[2],x0,NA), ymax=y0, ymin=shiftup*2), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis2$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1<x.reject2[1],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject2[2],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis2$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2<x.reject2[1],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject2[2],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis2$y2), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject2, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(100), size=3, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(107), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(112), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,max(samdis2$y0)), name="")+
+  # design
+  theme_bw()+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis2$y0)/max(samdis2$y)*0.1)+ 
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.14, label=expression(paste("H0: ",mu==100,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.07, label=expression(paste(sigma==10,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.00, label=expression(paste(alpha==0.05)), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=-0.07, label=expression(paste(N==15)), color="black")
+
+p.powercurve = ggplot(powacurve)+
+  # power curve
+  geom_line(aes(x=x, y=pow1), size=1, color="purple4", alpha=0.8)+
+  geom_line(aes(x=x, y=pow2), size=1, color="darkred", alpha=0.8)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=power1[1], yend=power1[1]), color="black")+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=power1[2], yend=power1[2]), color="black")+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=power2[1], yend=power2[1]), color="black")+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=power2[2], yend=power2[2]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(1-beta,"   or   ",alpha)))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.dists1 / p.dists2 / p.powercurve
+```
+
+
+```{r power vs alpha, fig.height=5.8, fig.width=5}
+h0 = 100; x = seq(70,130,0.1); b1 = vector(length=length(x)); b2=b1; x.valofi = c(107,112)
+
+N = c(15,15)
+alpha = c(0.05,0.20)
+sigma = c(10,10)
+
+# Values that would lead to h0 rejection.
+x.reject1 = h0 + c(-1,1) * abs(qnorm(alpha[1]/2,0,1))*sigma[1]/sqrt(N[1])
+x.reject2 = h0 + c(-1,1) * abs(qnorm(alpha[2]/2,0,1))*sigma[2]/sqrt(N[2])
+
+# Power.
+for(i in 1:length(x)){
+  
+  if(x[i] >= h0){
+    auc.upper1 = pnorm(x.reject1[2], x[i], sigma/sqrt(N[1]))
+    auc.lower1 = pnorm(x.reject1[1], x[i], sigma/sqrt(N[1]))
+    b1[i] = auc.upper1 - auc.lower1
+    auc.upper2 = pnorm(x.reject2[2], x[i], sigma/sqrt(N[2]))
+    auc.lower2 = pnorm(x.reject2[1], x[i], sigma/sqrt(N[2]))
+    b2[i] = auc.upper2 - auc.lower2
+  }else{
+    auc.upper1 = pnorm(-x.reject1[2], -x[i], sigma/sqrt(N[1]))
+    auc.lower1 = pnorm(-x.reject1[1], -x[i], sigma/sqrt(N[1]))
+    b1[i] = auc.lower1 - auc.upper1
+    auc.upper2 = pnorm(-x.reject2[2], -x[i], sigma/sqrt(N[2]))
+    auc.lower2 = pnorm(-x.reject2[1], -x[i], sigma/sqrt(N[2]))
+    b2[i] = auc.lower2 - auc.upper2}}
+
+powacurve = data.frame(x, pow1=1-b1, pow2=1-b2)
+
+# Power for values of interest.
+power1    = powacurve$pow1[powacurve$x==x.valofi[1]]
+power1[2] = powacurve$pow1[powacurve$x==x.valofi[2]]
+power2    = powacurve$pow2[powacurve$x==x.valofi[1]]
+power2[2] = powacurve$pow2[powacurve$x==x.valofi[2]]
+
+# Sampling distributions over h0 and values of interest.
+samdis1 = with(density(rnorm(reps,0,sigma[1]/sqrt(N[1]))), data.frame(x,y))
+samdis2 = with(density(rnorm(reps,0,sigma[2]/sqrt(N[2]))), data.frame(x,y))
+samdis1 = samdis1 %>%
+  mutate(x0=x+h0, x1=x+x.valofi[1], x2=x+x.valofi[2])
+samdis2 = samdis2 %>%
+  mutate(x0=x+h0, x1=x+x.valofi[1], x2=x+x.valofi[2])
+
+# Vertical shift for sampling distributions. 
+shiftup = max(c(samdis1$y,samdis2$y))*1.25
+samdis1 = samdis1 %>%
+  mutate(y0=y+shiftup*2, y1=y+shiftup*1, y2=y)
+samdis2 = samdis2 %>%
+  mutate(y0=y+shiftup*2, y1=y+shiftup*1, y2=y)
+
+
+p.dists1 = ggplot(data=samdis1)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*2), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject1[1],x0,NA), ymax=y0, ymin=shiftup*2), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject1[2],x0,NA), ymax=y0, ymin=shiftup*2), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis1$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1<x.reject1[1],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject1[2],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis1$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2<x.reject1[1],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject1[2],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis1$y2), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject1, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(100), size=3, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(107), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(112), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,NA), name="")+
+  # design
+  theme_bw()+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis1$y0)/max(samdis2$y)*0.1)+ 
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.14, label=expression(paste("H0: ",mu==100,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.07, label=expression(paste(sigma==10,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.00, label=expression(paste(alpha==0.05)), color="black")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=-0.07, label=expression(paste(N==15)), color="#3b3b3b")
+
+p.dists2 = ggplot(data=samdis2)+
+  # Top Layer
+  geom_ribbon(aes(x=x0, ymax=y0, ymin=shiftup*2), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x0<x.reject2[1],x0,NA), ymax=y0, ymin=shiftup*2), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x0>x.reject2[2],x0,NA), ymax=y0, ymin=shiftup*2), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="red", linetype="dashed", aes(x=h0, xend=h0, y=max(samdis2$y0), yend=-.05))+
+  # 2nd Layer
+  geom_ribbon(aes(x=x1, ymax=y1, ymin=shiftup*1), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x1<x.reject2[1],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x1>x.reject2[2],x1,0), ymax=y1, ymin=shiftup*1), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[1], xend=x.valofi[1], y=max(samdis2$y1), yend=-.05))+
+  # 3rd Layer
+  geom_ribbon(aes(x=x2, ymax=y2, ymin=shiftup*0), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(x2<x.reject2[1],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_ribbon(aes(x=ifelse(x2>x.reject2[2],x2,0), ymax=y2, ymin=shiftup*0), color=NA, fill="darkred", size=1, alpha=0.4)+
+  geom_segment(size=0.5, color="navy", linetype="dashed", aes(x=x.valofi[2], xend=x.valofi[2], y=max(samdis2$y2), yend=-.05))+
+  # rejection  cutoffs
+  geom_vline(xintercept=x.reject2, size=0.5, color="black")+
+  # mu annotations
+  annotate("text", label=expression(100), size=3, color="red", hjust=0.5, vjust=1, x=h0, y=-.05)+
+  annotate("text", label=expression(107), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[1], y=-.05)+
+  annotate("text", label=expression(112), size=3, color="navy", hjust=0.5, vjust=1, x=x.valofi[2], y=-.05)+
+  # legend
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=2*shiftup+0.06, ymax=2*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =   ")), hjust=1, vjust=0.5, x=128, y=2*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=1*shiftup+0.06, ymax=1*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=1*shiftup+0.08)+
+  
+  annotate("rect", size=1, alpha=0.4, color="darkred", fill="darkred", xmin=128, xmax=130, ymin=0*shiftup+0.06, ymax=0*shiftup+0.10)+
+  annotate("text", size=3, label=expression(paste(1-beta,"  =   ")), hjust=1, vjust=0.5, x=128, y=0*shiftup+0.08)+
+  # axes
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(-.08,max(samdis2$y0)), name="")+
+  # design
+  theme_bw()+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis2$y0)/max(samdis2$y)*0.1)+ 
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.14, label=expression(paste("H0: ",mu==100,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.07, label=expression(paste(sigma==10,"cm")), color="#3b3b3b")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=+0.00, label=expression(paste(alpha==0.2)), color="black")+
+  annotate("text", hjust=0, vjust=0, size=3, x=70, y=-0.07, label=expression(paste(N==15)), color="#3b3b3b")
+
+p.powercurve = ggplot(powacurve)+
+  # power curve
+  geom_line(aes(x=x, y=pow1), size=1, color="darkred", alpha=0.8)+
+  geom_line(aes(x=x, y=pow2), size=1, color="darkred", alpha=0.8)+
+  # Highlights
+  geom_vline(xintercept=h0, color="red", linetype="dashed")+
+  geom_vline(xintercept=x.valofi, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=power1[1], yend=power1[1]), color="black")+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=power1[2], yend=power1[2]), color="black")+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[1], xend=70, y=power2[1], yend=power2[1]), color="black")+
+  #geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=x.valofi[2], xend=70, y=power2[2], yend=power2[2]), color="black")+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=70, y=alpha[1]+0.04)+
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.20")), hjust=0, vjust=0, x=70, y=alpha[2]+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste("H0 Rejection Rate")))+
+  #scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.1), name=expression(paste(1-beta,"   or   ",alpha)))+
+  theme(panel.grid=element_blank(),
+        #axis.title.x=element_blank(),
+        aspect.ratio=1/3)
+
+p.dists1 / p.dists2 / p.powercurve
+```
+
+
+```{r power contour, fig.height=2.5, fig.width=6.5}
+# Plot 1 ####
+h0 = 100; alpha = 0.05; sigma = 10
+
+x_range = seq(85,115,0.1)
+n_range = seq(5,55,1)
+
+power = matrix(nrow=length(n_range), ncol=length(x_range))
+
+# Values that would lead to h0 rejection.
+x.reject = matrix(nrow=2, ncol=length(n_range))
+x.reject[1,] = h0 - 1 * abs(qnorm(alpha/2,0,1))*sigma/sqrt(n_range)
+x.reject[2,] = h0 + 1 * abs(qnorm(alpha/2,0,1))*sigma/sqrt(n_range)
+
+# Power.
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    
+    if(x_range[x] >= h0){
+    auc.upper = pnorm(x.reject[2,n], x_range[x], sigma/sqrt(n_range[n]))
+    auc.lower = pnorm(x.reject[1,n], x_range[x], sigma/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}
+    else{
+    auc.upper = pnorm(-x.reject[2,n], -x_range[x], sigma/sqrt(n_range[n]))
+    auc.lower = pnorm(-x.reject[1,n], -x_range[x], sigma/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}}} #need abs here for some reason, otherwise beta is negative
+
+# Concatetate columns (rows would require transpose: t(power)); create data
+power = as.vector(power)
+n     = rep(n_range, length(x_range))
+x     = rep(x_range, each=length(n_range))
+dat   = data.frame(x=x, n=n, power=power)
+
+p.contour1 = ggplot(dat, aes(x=x, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(breaks=seq(90,110,10), name=expression(paste(mu," [cm]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        axis.title.x=element_blank(),
+        #axis.title.y=element_blank(),
+        #axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste("H0: ",mu==100,",  ",sigma==10,",  ",alpha==0.05)))
+
+# Plot 2 ####
+h0 = 100; alpha = 0.05; sigma = 15
+
+x_range = seq(85,115,0.1)
+n_range = seq(5,55,1)
+
+power = matrix(nrow=length(n_range), ncol=length(x_range))
+
+# Values that would lead to h0 rejection.
+x.reject = matrix(nrow=2, ncol=length(n_range))
+x.reject[1,] = h0 - 1 * abs(qnorm(alpha/2,0,1))*sigma/sqrt(n_range)
+x.reject[2,] = h0 + 1 * abs(qnorm(alpha/2,0,1))*sigma/sqrt(n_range)
+
+# Power.
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    
+    if(x_range[x] >= h0){
+    auc.upper = pnorm(x.reject[2,n], x_range[x], sigma/sqrt(n_range[n]))
+    auc.lower = pnorm(x.reject[1,n], x_range[x], sigma/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}
+    else{
+    auc.upper = pnorm(-x.reject[2,n], -x_range[x], sigma/sqrt(n_range[n]))
+    auc.lower = pnorm(-x.reject[1,n], -x_range[x], sigma/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}}} #need abs here for some reason, otherwise beta is negative
+
+# Concatetate columns (rows would require transpose: t(power)); create data
+power = as.vector(power)
+n     = rep(n_range, length(x_range))
+x     = rep(x_range, each=length(n_range))
+dat   = data.frame(x=x, n=n, power=power)
+
+p.contour2 = ggplot(dat, aes(x=x, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(breaks=seq(90,110,10), name=expression(paste(mu," [cm]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        #axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste("H0: ",mu==100,",  ",sigma==15,",  ",alpha==0.05)))
+
+# Plot 3 ####
+h0 = 100; alpha = 0.01; sigma = 15
+
+x_range = seq(85,115,0.1)
+n_range = seq(5,55,1)
+
+power = matrix(nrow=length(n_range), ncol=length(x_range))
+
+# Values that would lead to h0 rejection.
+x.reject = matrix(nrow=2, ncol=length(n_range))
+x.reject[1,] = h0 - 1 * abs(qnorm(alpha/2,0,1))*sigma/sqrt(n_range)
+x.reject[2,] = h0 + 1 * abs(qnorm(alpha/2,0,1))*sigma/sqrt(n_range)
+
+# Power.
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    
+    if(x_range[x] >= h0){
+    auc.upper = pnorm(x.reject[2,n], x_range[x], sigma/sqrt(n_range[n]))
+    auc.lower = pnorm(x.reject[1,n], x_range[x], sigma/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}
+    else{
+    auc.upper = pnorm(-x.reject[2,n], -x_range[x], sigma/sqrt(n_range[n]))
+    auc.lower = pnorm(-x.reject[1,n], -x_range[x], sigma/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}}} #need abs here for some reason, otherwise beta is negative
+
+# Concatetate columns (rows would require transpose: t(power)); create data
+power = as.vector(power)
+n     = rep(n_range, length(x_range))
+x     = rep(x_range, each=length(n_range))
+dat   = data.frame(x=x, n=n, power=power)
+
+p.contour3 = ggplot(dat, aes(x=x, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(breaks=seq(90,110,10), name=expression(paste(mu," [cm]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        #legend.position="none",
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste("H0: ",mu==100,",  ",sigma==15,",  ",alpha==0.01)))
+
+p.contour1 | p.contour2 | p.contour3
+```
+
+
+```{r repeat sampdist plot, fig.height=4.2, fig.width=5}
+set.seed(5)
+
+mu=100; sigma=10; N=c(5, 15, 50); reps=100000
+
+samdists= rbind(with(density(rnorm(reps,mu,sigma)), data.frame(x,y)),
+                with(density(replicate(n=reps,mean(rnorm(N[1],mu,sigma)))), data.frame(x,y)),
+                with(density(replicate(n=reps,mean(rnorm(N[2],mu,sigma)))), data.frame(x,y)),
+                with(density(replicate(n=reps,mean(rnorm(N[3],mu,sigma)))), data.frame(x,y)))
+
+samdists$l = rep(c("Population", "N = 5", "N = 15", "N = 50"), each=512) #512 is length of density()
+samdists$l = factor(samdists$l, levels=c("N = 50", "N = 15", "N = 5", "Population"))
+
+legend = ggplot()+
+  theme_bw()+
+  theme(axis.title=element_blank(), axis.text=element_blank(), axis.ticks=element_blank(), panel.grid=element_blank())+
+  theme_void()+
+  coord_fixed()+
+  scale_x_continuous(limits=c(0,8))+
+  scale_y_continuous(limits=c(0,6))+
+  annotate("rect", xmin=0, xmax=0.8, ymin=4, ymax=4.8, size=1, alpha=0.2, fill=NA, color="darkorange")+
+  annotate("rect", xmin=0, xmax=0.8, ymin=3, ymax=3.8, size=1, alpha=0.2, fill=NA, color="darkred")+
+  annotate("rect", xmin=0, xmax=0.8, ymin=2, ymax=2.8, size=1, alpha=0.2, fill=NA, color="purple4")+
+  annotate("rect", xmin=0, xmax=0.8, ymin=0, ymax=0.8, size=1, alpha=0.2, fill="gray40", color="black")+
+  
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=4.4, label="N = 50")+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=3.4, label="N = 15")+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=2.4, label="N =  5")+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=1, y=0.4, label=expression(paste("Normal (",mu,", ",sigma,")")))+
+  annotate("text", hjust=0, vjust=0.5, size=3, x=3.4, y=3.3, label=expression(paste("Normal (",mu,", ",frac(sigma,sqrt(N)),")")))+
+  
+  geom_segment(size=0.5, linetype="dotted", aes(x=3.3, xend=3.3, y=2, yend=4.8))+
+  
+  annotate("text", hjust=0, vjust=0, size=3, x=0, y=5.1, label=expression(bold("Distributions of m")))+
+  annotate("text", hjust=0, vjust=0, size=3, x=0, y=1, label=expression(bold("Population")))
+
+p.samdists = ggplot(data=samdists, aes(x=x, y=y, color=l, fill=l))+
+  geom_segment(aes(x=mu,xend=mu,y=-0.01,yend=max(samdists$y)), size=1, color="navy", linetype="dashed")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=-0.02, label="mu", color="navy")+
+  geom_area(size=1, alpha=0.2)+
+  scale_fill_manual(values=c(NA,NA,NA,"gray40"), name="") +
+  scale_color_manual(values=c("darkorange","darkred","purple4","black"), name="")+
+  scale_x_continuous(name="Height [cm]", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="Probability Density", limits=c(-0.05,NA))+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")+
+  annotation_custom(ggplotGrob(legend), ymin=0.02, ymax=0.28, xmin=mu-3*sigma, xmax=95)
+
+s1 = data.frame(x=c(rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma),rnorm(N[1],mu,sigma)),
+                y=rep(1:5), each=N[1]) #5 samples
+s2 = data.frame(x=c(rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma),rnorm(N[2],mu,sigma)),
+                y=rep(1:5), each=N[2])
+s3 = data.frame(x=c(rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma),rnorm(N[3],mu,sigma)),
+                y=rep(1:5), each=N[3])
+
+m1 = tapply(s1$x, s1$y, mean); m1 = data.frame(x=m1, y=1:5)
+m2 = tapply(s2$x, s2$y, mean); m2 = data.frame(x=m2, y=1:5)
+m3 = tapply(s3$x, s3$y, mean); m3 = data.frame(x=m3, y=1:5)
+
+p.N1 = ggplot()+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=5.5), color="navy", size=1, linetype="dashed")+
+  geom_point(data=s1, aes(x=x,y=y), shape=21, size=3, color="black", fill="gray85")+
+  geom_point(data=m1, aes(x=x,y=y), shape=22, size=4, color="black", fill="purple4")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=0.4, label="mu", color="navy")+
+  scale_x_continuous(name="", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="Sample #", limit=c(0,5.5), breaks=1:5)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.title.x=element_blank(),
+        aspect.ratio=1.2) #sufficient to set for one plot of the row
+
+p.N2 = ggplot()+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=5.5), color="navy", size=1, linetype="dashed")+
+  geom_point(data=s2, aes(x=x,y=y), shape=21, size=3, color="black", fill="gray85")+
+  geom_point(data=m2, aes(x=x,y=y), shape=22, size=4, color="black", fill="darkred")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=0.4, label="mu", color="navy")+
+  scale_x_continuous(name="", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="", limit=c(0,5.5), breaks=1:5)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank())
+
+p.N3 = ggplot()+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=5.5), color="navy", size=1, linetype="dashed")+
+  geom_point(data=s3, aes(x=x,y=y), shape=21, size=3, color="black", fill="gray85")+
+  geom_point(data=m3, aes(x=x,y=y), shape=22, size=4, color="black", fill="darkorange")+
+  annotate(geom="text", size=5, hjust=0.5, vjust=1, parse=T, x=mu, y=0.4, label="mu", color="navy")+
+  scale_x_continuous(name="", limits=c(mu-3*sigma,mu+3*sigma))+
+  scale_y_continuous(name="", limit=c(0,5.5), breaks=1:5)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank())
+
+(p.N1|p.N2|p.N3) / p.samdists
+```
+
+
+```{r z-statistic plot, fig.height=4, fig.width=5}
+set.seed(5)
+
+mu=100; sigma=10; N=c(5, 15, 50); reps=100000; alpha=0.05
+
+samdists = cbind(rbind(with(density(replicate(n=reps,mean(rnorm(N[1],0,sigma)))), data.frame(x,y)),
+                       with(density(replicate(n=reps,mean(rnorm(N[2],0,sigma)))), data.frame(x,y)),
+                       with(density(replicate(n=reps,mean(rnorm(N[3],0,sigma)))), data.frame(x,y))),
+                 rbind(with(density(replicate(n=reps,mean(rnorm(N[1],0,sigma))/(sigma/sqrt(N[1])))), data.frame(xz=x,yz=y)),
+                       with(density(replicate(n=reps,mean(rnorm(N[2],0,sigma))/(sigma/sqrt(N[2])))), data.frame(xz=x,yz=y)),
+                       with(density(replicate(n=reps,mean(rnorm(N[3],0,sigma))/(sigma/sqrt(N[3])))), data.frame(xz=x,yz=y))))
+
+# Normalize x-axis to sigma
+samdists$x = samdists$x/sigma
+
+samdists$n = rep(c("N = 5", "N = 15", "N = 50"), each=512)
+samdists$n = factor(samdists$n, levels=c("N = 5", "N = 15", "N = 50"))
+
+# technially unnecessary as zcrit independent of N here, but for t-dist will depend on N
+zcrit = cbind(c(-1,1) * abs(qnorm(alpha/2,0,1)),
+              c(-1,1) * abs(qnorm(alpha/2,0,1)),
+              c(-1,1) * abs(qnorm(alpha/2,0,1)))
+
+samdists$low[samdists$n=="N = 5"]  = ifelse(samdists$xz[samdists$n=="N = 5"]<zcrit[1,1], samdists$xz[samdists$n=="N = 5"], NA)
+samdists$low[samdists$n=="N = 15"] = ifelse(samdists$xz[samdists$n=="N = 15"]<zcrit[1,2], samdists$xz[samdists$n=="N = 15"], NA)
+samdists$low[samdists$n=="N = 50"] = ifelse(samdists$xz[samdists$n=="N = 50"]<zcrit[1,3], samdists$xz[samdists$n=="N = 50"], NA)
+
+samdists$high[samdists$n=="N = 5"]  = ifelse(samdists$xz[samdists$n=="N = 5"]>zcrit[2,1], samdists$xz[samdists$n=="N = 5"], NA)
+samdists$high[samdists$n=="N = 15"] = ifelse(samdists$xz[samdists$n=="N = 15"]>zcrit[2,2], samdists$xz[samdists$n=="N = 15"], NA)
+samdists$high[samdists$n=="N = 50"] = ifelse(samdists$xz[samdists$n=="N = 50"]>zcrit[2,3], samdists$xz[samdists$n=="N = 50"], NA)
+
+samdists$zcrit[samdists$n=="N = 5"]  = c(zcrit[1,1], zcrit[2,1], rep(NA,dim(samdists)[1]/3-2))
+samdists$zcrit[samdists$n=="N = 15"] = c(zcrit[1,2], zcrit[2,2], rep(NA,dim(samdists)[1]/3-2))
+samdists$zcrit[samdists$n=="N = 50"] = c(zcrit[1,3], zcrit[2,3], rep(NA,dim(samdists)[1]/3-2))
+
+p.samdismean = ggplot(data=samdists)+
+  geom_area(aes(x=x, y=y, color=n, fill=NA), size=1)+
+  facet_grid(. ~ n)+
+  scale_color_manual(values=c("purple4","darkred","darkorange"), name="")+
+  scale_fill_manual(values=c("purple4","darkred","darkorange"), name="")+
+  # Design
+  scale_x_continuous(limits=c(-1.5,1.5), breaks=-1:1, name=expression(paste(frac(m-mu,sigma))))+
+  scale_y_continuous(name="Density")+
+  theme_bw()+
+  theme(#aspect.ratio=1,
+        panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")
+
+p.zstat = ggplot(data=samdists)+
+  geom_area(aes(x=xz, y=yz, color=n, fill=NA), size=1)+
+  facet_grid(. ~ n)+
+  geom_area(aes(x=low, y=yz, color=NA, fill=n), size=1, alpha=0.4)+
+  geom_area(aes(x=high, y=yz, color=NA, fill=n), size=1, alpha=0.4)+
+  geom_segment(aes(x=zcrit, xend=zcrit, y=0, yend=max(samdists$yz)))+
+  scale_color_manual(values=c("darkred","purple4","darkorange"), name="")+ #for whatever reason...
+  scale_fill_manual(values=c("darkred","purple4","darkorange"), name="")+  #1 and 2 are switched in plot
+  # Design
+  #scale_x_continuous(limits=c(-5,5), breaks=-3:3, name=expression(paste((m-mu)/(sigma/sqrt(N)))))+
+  scale_x_continuous(limits=c(-5,5), breaks=-3:3, name=expression(paste(frac(m-mu,sigma/sqrt(N)))))+
+  scale_y_continuous(name="Density")+
+  theme_bw()+
+  theme(#aspect.ratio=1,
+        panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")
+
+p.samdismean / p.zstat
+```
+
+
+```{r t-statistic plot, fig.height=6, fig.width=5}
+set.seed(5)
+
+mu=100; sigma=10; N=c(5, 15, 50); reps=100000; alpha=0.05
+
+get_t <- function(N,sigma){
+  x = rnorm(N,0,sigma)
+  t = mean(x)/(sd(x)/sqrt(N))
+  return(t)}
+
+samdists = cbind(rbind(with(density(replicate(n=reps,mean(rnorm(N[1],0,sigma)))), data.frame(xm=x,ym=y)),
+                       with(density(replicate(n=reps,mean(rnorm(N[2],0,sigma)))), data.frame(xm=x,ym=y)),
+                       with(density(replicate(n=reps,mean(rnorm(N[3],0,sigma)))), data.frame(xm=x,ym=y))),
+                 rbind(with(density(replicate(n=reps,sd(rnorm(N[1],0,sigma))-sigma)), data.frame(xsd=x,ysd=y)),
+                       with(density(replicate(n=reps,sd(rnorm(N[2],0,sigma))-sigma)), data.frame(xsd=x,ysd=y)),
+                       with(density(replicate(n=reps,sd(rnorm(N[3],0,sigma))-sigma)), data.frame(xsd=x,ysd=y))),
+                 rbind(with(density(replicate(n=reps,get_t(N[1],sigma))), data.frame(xt=x,yt=y)),
+                       with(density(replicate(n=reps,get_t(N[2],sigma))), data.frame(xt=x,yt=y)),
+                       with(density(replicate(n=reps,get_t(N[3],sigma))), data.frame(xt=x,yt=y))))
+
+# Normalize x-axis to sigma
+samdists$xm = samdists$xm/sigma
+samdists$xsd = samdists$xsd/sigma
+
+samdists$n = rep(c("N = 5", "N = 15", "N = 50"), each=512)
+samdists$n = factor(samdists$n, levels=c("N = 5", "N = 15", "N = 50"))
+samdists$df = rep(c("df = N-1 = 4", "df = N-1 = 14", "df = N-1 = 49"), each=512)
+samdists$df = factor(samdists$df, levels=c("df = N-1 = 4", "df = N-1 = 14", "df = N-1 = 49"))
+
+tcrit = cbind(c(-1,1) * abs(qt(alpha/2,N[1]-1)),
+              c(-1,1) * abs(qt(alpha/2,N[2]-1)),
+              c(-1,1) * abs(qt(alpha/2,N[3]-1)))
+
+samdists$low[samdists$n=="N = 5"]  = ifelse(samdists$xt[samdists$n=="N = 5"]<tcrit[1,1], samdists$xt[samdists$n=="N = 5"], NA)
+samdists$low[samdists$n=="N = 15"] = ifelse(samdists$xt[samdists$n=="N = 15"]<tcrit[1,2], samdists$xt[samdists$n=="N = 15"], NA)
+samdists$low[samdists$n=="N = 50"] = ifelse(samdists$xt[samdists$n=="N = 50"]<tcrit[1,3], samdists$xt[samdists$n=="N = 50"], NA)
+
+samdists$high[samdists$n=="N = 5"]  = ifelse(samdists$xt[samdists$n=="N = 5"]>tcrit[2,1], samdists$xt[samdists$n=="N = 5"], NA)
+samdists$high[samdists$n=="N = 15"] = ifelse(samdists$xt[samdists$n=="N = 15"]>tcrit[2,2], samdists$xt[samdists$n=="N = 15"], NA)
+samdists$high[samdists$n=="N = 50"] = ifelse(samdists$xt[samdists$n=="N = 50"]>tcrit[2,3], samdists$xt[samdists$n=="N = 50"], NA)
+
+samdists$tcrit[samdists$n=="N = 5"]  = c(tcrit[1,1], tcrit[2,1], rep(NA,dim(samdists)[1]/3-2))
+samdists$tcrit[samdists$n=="N = 15"] = c(tcrit[1,2], tcrit[2,2], rep(NA,dim(samdists)[1]/3-2))
+samdists$tcrit[samdists$n=="N = 50"] = c(tcrit[1,3], tcrit[2,3], rep(NA,dim(samdists)[1]/3-2))
+
+p.samdistmean = ggplot(data=samdists)+
+  geom_area(aes(x=xm, y=ym, color=n, fill=NA), size=1)+
+  facet_grid(. ~ n)+
+  scale_color_manual(values=c("purple4","darkred","darkorange"), name="")+
+  scale_fill_manual(values=c("purple4","darkred","darkorange"), name="")+
+  # Design
+  scale_x_continuous(limits=c(-1.5,1.5), breaks=-1:1, name=expression(paste(frac(m-mu,sigma))))+
+  scale_y_continuous(name="Density")+
+  theme_bw()+
+  theme(#aspect.ratio=1,
+        panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")
+
+p.samdistsd = ggplot(data=samdists)+
+  geom_area(aes(x=xsd, y=ysd, color=n, fill=NA), size=1)+
+  facet_grid(. ~ n)+
+  scale_color_manual(values=c("purple4","darkred","darkorange"), name="")+
+  scale_fill_manual(values=c("purple4","darkred","darkorange"), name="")+
+  # Design
+  scale_x_continuous(limits=c(-1.5,1.5), breaks=-1:1, name=expression(paste(frac(s-sigma,sigma))))+
+  scale_y_continuous(name="Density")+
+  theme_bw()+
+  theme(#aspect.ratio=1,
+        panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")
+
+p.tstat = ggplot(data=samdists)+
+  geom_area(aes(x=xt, y=yt, color=n, fill=NA), size=1)+
+  facet_grid(. ~ n)+
+  geom_area(aes(x=low, y=yt, color=NA, fill=n), size=1, alpha=0.4)+
+  geom_area(aes(x=high, y=yt, color=NA, fill=n), size=1, alpha=0.4)+
+  geom_segment(aes(x=tcrit, xend=tcrit, y=0, yend=max(samdists$yt)))+
+  scale_color_manual(values=c("darkred","purple4","darkorange"), name="")+ #for whatever reason...
+  scale_fill_manual(values=c("darkred","purple4","darkorange"), name="")+  #1 and 2 are switched in plot
+  # Design
+  #scale_x_continuous(limits=c(-5,5), breaks=-3:3, name=expression(paste((m-mu)/(s/sqrt(N))==t)))+
+  scale_x_continuous(limits=c(-5,5), breaks=-3:3, name=expression(paste(frac(m-mu,s/sqrt(N)))))+
+  scale_y_continuous(name="Density")+
+  theme_bw()+
+  theme(#aspect.ratio=1,
+        panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        legend.position="none")
+
+p.samdistmean / p.samdistsd / p.tstat
+```
+
+
+```{r CI plot zstat, fig.height=4.8, fig.width=7.2}
+# Params
+set.seed(5); mu=100; sigma=10; N=15; reps=100000
+
+# Create sample (x-scale: raw), popdis and samdis (x-scale: SEM).
+sample = data.frame(x=rnorm(N,mu,sigma),y=rep(0,N)) #sample
+popdis = with(density(rnorm(reps,0,1*sqrt(N))), data.frame(x,y)) #popdis centred on zero
+samdis = with(density(rnorm(reps,0,1)), data.frame(x,y)) #samdis centred on zero
+
+# Add to samdis: x-values centred on lower and upper CI limits.
+alpha = 0.05
+shift = qnorm(c(alpha/2, 1-alpha/2),0,1) # CI limits
+samdis$xl = samdis$x + shift[1]          # left samdis
+samdis$xr = samdis$x + shift[2]          # right samdis
+
+# Add to samdis: y-values to stack everything in one plot.
+shiftup = max(samdis$y)*1.25
+samdis$yl = samdis$y + shiftup*2 # CI, right samdis, left samdis are spaced 1.25 * (height of samdis) on y
+samdis$yr = samdis$y + shiftup   # ... i.e. the two samdis are spaced 0.25 * (height of samdis) on y
+
+# Create data: p-value curve.
+x = c(seq(-35/(sigma/sqrt(N)), 35/(sigma/sqrt(N)), 0.01), 0)
+p = vector(length=length(x))
+
+for (i in 1:length(x)){
+  if (x[i] < 0){
+    p[i] = pnorm(x[i],0,1) * 2}
+  else {
+    p[i] = (1 - pnorm(x[i],0,1)) * 2}}
+
+pcurve.z = data.frame(x,p)
+
+# Plotting params.
+xlimits  = c(-30,30)/(sigma/sqrt(N))
+mdev     = abs(mean(sample$x) - c(mu-30, mu+30)) # to make 0 on test stat scale...
+mdev[1]  = -mdev[1]                              # ...align with mean(sample$x) on raw scale
+xlimits2 = mdev/(sigma/sqrt(N))
+xbreaks  = -5:5
+xbreaks2 = xbreaks
+xcutoff  = 0       
+xlabels  = c(expression(paste("Distance from ",mu," [",sigma/sqrt(N),"]")),
+             expression(paste("Distance from ",m," [",sigma/sqrt(N),"]")))
+
+p.pop1 = ggplot()+
+  geom_area(data=popdis, aes(x=x, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_area(data=samdis, aes(x=x, y=y), size=1, color="darkred", fill=NA)+
+  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+  theme_bw()+
+  scale_x_continuous(limits=xlimits, breaks=xbreaks, name=xlabels[1])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+p.sample1 = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.ci1 = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xl, ymin=shiftup*2, ymax=yl), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xl>xcutoff,xl,NA), ymin=shiftup*2, ymax=yl), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Right sampling distribution and area
+  geom_ribbon(aes(x=xr, ymin=shiftup, ymax=yr), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xr<xcutoff,xr,NA), ymin=shiftup, ymax=yr), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=xcutoff)+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift[1], xend=shift[1], y=max(samdis$yl), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #left
+  geom_segment(aes(x=shift[2], xend=shift[2], y=max(samdis$yr), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #right
+  # CI & Point Estimate
+  geom_segment(aes(x=shift[1], xend=shift[2], y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff, y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2, breaks=xbreaks2, name=xlabels[2])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve1 = ggplot(data=pcurve.z, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift[1], xend=shift[2], y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff, y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=min(xlimits2), y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2, breaks=xbreaks2, name=xlabels[2])+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.2), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+shift.r      = mean(sample$x) + shift * (sigma/sqrt(N))
+xlimits.r    = xlimits * (sigma/sqrt(N))
+xlimits2.r   = xlimits2 * (sigma/sqrt(N)) + mean(sample$x)
+xbreaks.r    = seq(-20,20,10)
+xbreaks2.r   = xbreaks.r+100
+xcutoff.r    = mean(sample$x)      
+xlabels.r    = c(expression(paste("Distance from ",mu," [cm]")), "Height [cm]")
+# Convert x-scale of data for plot 1 (zero centred)
+popdis$x.r   = popdis$x * (sigma/sqrt(N))
+samdis$x.r   = samdis$x * (sigma/sqrt(N))
+# Convert x-scale of data for plots 3,4 (mu centred)
+samdis$xl.r  = samdis$xl * (sigma/sqrt(N)) + mean(sample$x)
+samdis$xr.r  = samdis$xr * (sigma/sqrt(N)) + mean(sample$x)
+pcurve.z$x.r = pcurve.z$x * (sigma/sqrt(N)) + mean(sample$x)
+
+p.pop2 = ggplot()+
+  geom_area(data=popdis, aes(x=x.r, y=y), size=1, color="black", fill="gray40", alpha=0.2)+
+  geom_area(data=samdis, aes(x=x.r, y=y), size=1, color="darkred", fill=NA)+
+  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+  theme_bw()+
+  scale_x_continuous(limits=xlimits.r, breaks=xbreaks.r, name=xlabels.r[1])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+p.sample2 = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.ci2 = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xl.r, ymin=shiftup*2, ymax=yl), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xl.r>xcutoff.r,xl.r,NA), ymin=shiftup*2, ymax=yl), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Right sampling distribution and area
+  geom_ribbon(aes(x=xr.r, ymin=shiftup, ymax=yr), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xr.r<xcutoff.r,xr.r,NA), ymin=shiftup, ymax=yr), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=xcutoff.r)+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift.r[1], xend=shift.r[1], y=max(samdis$yl), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #left
+  geom_segment(aes(x=shift.r[2], xend=shift.r[2], y=max(samdis$yr), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #right
+  # CI & Point Estimate
+  geom_segment(aes(x=shift.r[1], xend=shift.r[2], y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff.r, y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2.r, breaks=xbreaks2.r, name=xlabels.r[2])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve2 = ggplot(data=pcurve.z, aes(x=x.r, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift.r, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift.r[1], xend=shift.r[2], y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff.r, y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=min(xlimits2.r), y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2.r, breaks=xbreaks2.r, name=xlabels.r[2])+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.2), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.cipcurve2 = p.cipcurve2+
+  theme(axis.title.y=element_blank())
+
+(p.pop1 / p.sample1 / p.ci1 / p.cipcurve1) | (p.pop2 / p.sample2 / p.ci2 / p.cipcurve2)
+```
+
+
+```{r CI plot tstat, fig.height=4.8, fig.width=7.2}
+# Params
+set.seed(5); mu=100; sigma=10; N=15; reps=100000
+
+# Create sample (x-scale: raw), popdis and samdis (x-scale: SEM).
+sample = data.frame(x=rnorm(N,mu,sigma),y=rep(0,N)); s=sd(sample$x) #sample
+samdis = with(density(rt(reps,N-1)), data.frame(x,y)) #samdis centred on zero
+
+# Add to samdis: x-values centred on lower and upper CI limits.
+alpha = 0.05
+shift = qt(c(alpha/2, 1-alpha/2),N-1)    # CI limits
+samdis$xl = samdis$x + shift[1]          # left samdis
+samdis$xr = samdis$x + shift[2]          # right samdis
+
+# Add to samdis: y-values to stack everything in one plot.
+shiftup = max(samdis$y)*1.25
+samdis$yl = samdis$y + shiftup*2 # CI, right samdis, left samdis are spaced 1.25 * (height of samdis) on y
+samdis$yr = samdis$y + shiftup   # ... i.e. the two samdis are spaced 0.25 * (height of samdis) on y
+
+# Create data: p-value curve.
+x = c(seq(70,130,0.1), mean(sample$x))
+p = vector(length=length(x))
+
+for (i in 1:length(x)){
+  p[i] = t.test(sample$x, mu=x[i])$p.value}
+
+pcurve.z = data.frame(x,p)
+pcurve.z$x = (pcurve.z$x - mean(sample$x))/(s/sqrt(N))
+
+# Plotting params.
+xlimits  = c(-30,30)/(s/sqrt(N)) 
+mdev     = abs(mean(sample$x) - c(mu-30, mu+30)) # to make 0 on test stat scale...
+mdev[1]  = -mdev[1]                              # ...align with mean(sample$x) on raw scale
+xlimits2 = mdev/(sigma/sqrt(N))
+xbreaks  = -5:5
+xbreaks2 = xbreaks
+xcutoff  = 0       
+xlabels  = xlabels  = c(expression(paste("Distance from ",mu," [",s/sqrt(N),"]")),
+             expression(paste("Distance from ",m," [",s/sqrt(N),"]")))
+
+p.pop1 = ggplot()+
+  geom_area(data=samdis, aes(x=x, y=y), size=1, color="darkred", fill=NA)+
+  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+  theme_bw()+
+  scale_x_continuous(limits=xlimits, breaks=xbreaks, name=xlabels[1])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+p.sample1 = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.ci1 = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xl, ymin=shiftup*2, ymax=yl), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xl>xcutoff,xl,NA), ymin=shiftup*2, ymax=yl), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Right sampling distribution and area
+  geom_ribbon(aes(x=xr, ymin=shiftup, ymax=yr), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xr<xcutoff,xr,NA), ymin=shiftup, ymax=yr), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=xcutoff)+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift[1], xend=shift[1], y=max(samdis$yl), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #left
+  geom_segment(aes(x=shift[2], xend=shift[2], y=max(samdis$yr), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #right
+  # CI & Point Estimate
+  geom_segment(aes(x=shift[1], xend=shift[2], y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff, y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2, breaks=xbreaks2, name=xlabels[2])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve1 = ggplot(data=pcurve.z, aes(x=x, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift[1], xend=shift[2], y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff, y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=min(xlimits2), y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2, breaks=xbreaks2, name=xlabels[2])+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.2), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+shift.r      = mean(sample$x) + shift * (s/sqrt(N))
+xlimits.r    = xlimits #stays same, cannot know t-dist raw scale before knowing s
+xlimits2.r   = xlimits2 * (s/sqrt(N)) + mean(sample$x)
+xbreaks.r    = xbreaks #stays same, see above
+xbreaks2.r   = seq(-20,20,10)+100
+xcutoff.r    = mean(sample$x)      
+xlabels.r    = c(expression(paste("Distance from ",mu," [cm]")), "Height [cm]")
+# Convert x-scale of data for plot 1 (zero centred)
+popdis$x.r   = popdis$x #stays same, see above
+samdis$x.r   = samdis$x #stays same, see above
+# Convert x-scale of data for plots 3,4 (mu centred)
+samdis$xl.r  = samdis$xl * (s/sqrt(N)) + mean(sample$x)
+samdis$xr.r  = samdis$xr * (s/sqrt(N)) + mean(sample$x)
+pcurve.z$x.r = pcurve.z$x * (s/sqrt(N)) + mean(sample$x)
+
+#p.pop2 = ggplot()+
+#  geom_area(data=samdis, aes(x=x.r, y=y), size=1, color="darkred", fill=NA)+
+#  geom_vline(xintercept=0, color="navy", linetype="dashed")+
+#  theme_bw()+
+#  scale_x_continuous(limits=xlimits.r, breaks=xbreaks.r, name=xlabels[1])+
+#  scale_y_continuous(name="")+
+#  theme(axis.text.y=element_blank(),
+#        axis.ticks.y=element_blank(),
+#        panel.grid=element_blank(),
+#        aspect.ratio=0.1)
+
+p.sample2 = ggplot(data=sample, aes(x=x, y=y))+
+  geom_point(size=3, shape=21, fill="gray85")+
+  geom_vline(xintercept=mean(sample$x))+
+  geom_point(size=4, shape=22, fill="darkred", aes(x=mean(sample$x), y=0))+
+  theme_bw()+
+  scale_x_continuous(limits=c(70,130), breaks=seq(80,120,10), name="Height [cm]")+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.05)
+
+p.ci2 = ggplot(data=samdis)+
+  # Left sampling distribution and area
+  geom_ribbon(aes(x=xl.r, ymin=shiftup*2, ymax=yl), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xl.r>xcutoff.r,xl.r,NA), ymin=shiftup*2, ymax=yl), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Right sampling distribution and area
+  geom_ribbon(aes(x=xr.r, ymin=shiftup, ymax=yr), color="darkred", fill="white", size=1, alpha=1)+
+  geom_ribbon(aes(x=ifelse(xr.r<xcutoff.r,xr.r,NA), ymin=shiftup, ymax=yr), color=NA, fill="darkred", size=1, alpha=0.4)+
+  # Vertical line sample mean
+  geom_vline(xintercept=xcutoff.r)+
+  # Vertical line sampling distributions mean
+  geom_segment(aes(x=shift.r[1], xend=shift.r[1], y=max(samdis$yl), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #left
+  geom_segment(aes(x=shift.r[2], xend=shift.r[2], y=max(samdis$yr), yend=0.1*max(samdis$y)), linetype="dashed", color="navy")+ #right
+  # CI & Point Estimate
+  geom_segment(aes(x=shift.r[1], xend=shift.r[2], y=0, yend=0), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff.r, y=0), shape=22, color="darkred", fill="darkred", size=4)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2.r, breaks=xbreaks2.r, name=xlabels.r[2])+
+  scale_y_continuous(name="")+
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=max(samdis$yl)*0.1/max(samdis$y)) #scales to pvalue plot, which had ratio max(samdis$y)*0.1/max(samdis$y) = 0.1
+
+p.cipcurve2 = ggplot(data=pcurve.z, aes(x=x.r, y=p))+
+  # p curve
+  geom_line(size=1, color="darkred", alpha=0.4)+
+  # Highlights
+  geom_vline(xintercept=shift.r, color="navy", linetype="dashed")+
+  geom_hline(yintercept=alpha, color="black")+
+  # CI (might be too much)
+  geom_segment(aes(x=shift.r[1], xend=shift.r[2], y=alpha, yend=alpha), color="darkred", size=1.5)+
+  geom_point(aes(x=xcutoff.r, y=alpha), shape=22, color="darkred", fill="darkred", size=4)+
+  # Legend
+  annotate("text", size=3, label=expression(paste(alpha,"  =  0.05")), hjust=0, vjust=0, x=min(xlimits2.r), y=alpha+0.04)+
+  # Design
+  theme_bw()+
+  scale_x_continuous(limits=xlimits2.r, breaks=xbreaks2.r, name=xlabels.r[2])+
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,0.2), name="p-value")+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1/3)
+
+p.cipcurve2 = p.cipcurve2+
+  theme(axis.title.y=element_blank())
+
+placeholder = ggplot()+
+  theme_minimal()+
+  scale_x_continuous(limits=xlimits, breaks=xbreaks, name=xlabels[1])+
+  scale_y_continuous(name="")+
+  theme(axis.title.x=element_text(color="white"),
+        axis.text.x=element_text(color="white"),
+        #axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.1)
+
+(p.pop1 / p.sample1 / p.ci1 / p.cipcurve1) | (placeholder / p.sample2 / p.ci2 / p.cipcurve2)
+```
+
+
+```{r power contour d, fig.height=4.6, fig.width=6.5}
+h0 = 0; alpha = 0.05; sigma = c(10,20)
+
+x_range = seq(-2*max(sigma),2*max(sigma),0.1)
+n_range = seq(5,55,1)
+
+# SIGMA[1]
+power = matrix(nrow=length(n_range), ncol=length(x_range))
+powert= matrix(nrow=length(n_range), ncol=length(x_range)) #t-test
+
+# Values that would lead to h0 rejection.
+x.reject = matrix(nrow=2, ncol=length(n_range))
+x.reject[1,] = h0 - 1 * abs(qnorm(alpha/2,0,1))*sigma[1]/sqrt(n_range)
+x.reject[2,] = h0 + 1 * abs(qnorm(alpha/2,0,1))*sigma[1]/sqrt(n_range)
+
+# Power.
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    powert[n,x] = power.t.test(n=n_range[n], delta=x_range[x], sd=sigma[1], power=NULL, type="one.sample")$power #t-test
+    if(x_range[x] >= h0){
+    auc.upper = pnorm(x.reject[2,n], x_range[x], sigma[1]/sqrt(n_range[n]))
+    auc.lower = pnorm(x.reject[1,n], x_range[x], sigma[1]/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}
+    else{
+    auc.upper = pnorm(-x.reject[2,n], -x_range[x], sigma[1]/sqrt(n_range[n]))
+    auc.lower = pnorm(-x.reject[1,n], -x_range[x], sigma[1]/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}}} #need abs here for some reason, otherwise beta is negative
+
+# Concatetate columns (rows would require transpose: t(power)); create data
+power = as.vector(power)
+powert= as.vector(powert) #t-test
+n     = rep(n_range, length(x_range))
+x     = rep(x_range, each=length(n_range))
+d     = x/sigma[1]
+dat   = data.frame(x=x, d=d, n=n, power=power, powert=powert)
+
+p.contour.r1 = ggplot(dat, aes(x=x, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma[1]==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(limits=c(-2*max(sigma),2*max(sigma)), breaks=seq(-2*max(sigma),2*max(sigma),20), name=expression(paste("Distance from H0 [cm]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        axis.title.x=element_blank(),
+        #axis.title.y=element_blank(),
+        #axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste(sigma==10,",  ",alpha==0.05," (z-test)")))
+
+p.contour.d1 = ggplot(dat, aes(x=d, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma[1]==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(limits=c(-2,2), breaks=seq(-2,2,1), name=expression(paste("Distance from H0 [",sigma,"]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste(sigma==10,",  ",alpha==0.05," (z-test)")))
+
+p.contour.d1t = ggplot(dat, aes(x=d, y=n))+
+  geom_raster(aes(fill=powert))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma[1]==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(limits=c(-2,2), breaks=seq(-2,2,1), name=expression(paste("Distance from H0 [",sigma,"]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste(sigma==10,",  ",alpha==0.05," (t-test)")))
+
+# SIGMA[2]
+power = matrix(nrow=length(n_range), ncol=length(x_range))
+powert= matrix(nrow=length(n_range), ncol=length(x_range)) #t-test
+
+# Values that would lead to h0 rejection.
+x.reject = matrix(nrow=2, ncol=length(n_range))
+x.reject[1,] = h0 - 1 * abs(qnorm(alpha/2,0,1))*sigma[2]/sqrt(n_range)
+x.reject[2,] = h0 + 1 * abs(qnorm(alpha/2,0,1))*sigma[2]/sqrt(n_range)
+
+# Power.
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    powert[n,x] = power.t.test(n=n_range[n], delta=x_range[x], sd=sigma[2], power=NULL, type="one.sample")$power #t-test
+    if(x_range[x] >= h0){
+    auc.upper = pnorm(x.reject[2,n], x_range[x], sigma[2]/sqrt(n_range[n]))
+    auc.lower = pnorm(x.reject[1,n], x_range[x], sigma[2]/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}
+    else{
+    auc.upper = pnorm(-x.reject[2,n], -x_range[x], sigma[2]/sqrt(n_range[n]))
+    auc.lower = pnorm(-x.reject[1,n], -x_range[x], sigma[2]/sqrt(n_range[n]))
+    power[n,x] = 1-abs(auc.upper-auc.lower)}}} #need abs here for some reason, otherwise beta is negative
+
+# Concatetate columns (rows would require transpose: t(power)); create data
+power = as.vector(power)
+powert= as.vector(powert) #t-test
+n     = rep(n_range, length(x_range))
+x     = rep(x_range, each=length(n_range))
+d     = x/sigma[2]
+dat   = data.frame(x=x, d=d, n=n, power=power, powert=powert)
+
+p.contour.r2 = ggplot(dat, aes(x=x, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma[2]==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(limits=c(-2*max(sigma),2*max(sigma)), breaks=seq(-2*max(sigma),2*max(sigma),20), name=expression(paste("Distance from H0 [cm]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        #axis.title.x=element_blank(),
+        #axis.title.y=element_blank(),
+        #axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste(sigma==20,",  ",alpha==0.05," (z-test)")))
+
+p.contour.d2 = ggplot(dat, aes(x=d, y=n))+
+  geom_raster(aes(fill=power))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma[2]==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(limits=c(-2,2), breaks=seq(-2,2,1), name=expression(paste("Distance from H0 [",sigma,"]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        #axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste(sigma==20,",  ",alpha==0.05," (z-test)")))
+
+p.contour.d2t = ggplot(dat, aes(x=d, y=n))+
+  geom_raster(aes(fill=powert))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Power (",1-beta,")")))+
+  geom_vline(xintercept=h0, color="white", linetype="dotted")+
+  #annotate("text", hjust=0, vjust=1, x=min(x_range), y=max(n_range), label=expression(paste(sigma[1]==10,"cm, ",alpha==0.05)))+
+  theme_bw()+
+  scale_x_continuous(limits=c(-2,2), breaks=seq(-2,2,1), name=expression(paste("Distance from H0 [",sigma,"]")))+
+  scale_y_continuous(breaks=seq(5,55,10), name=expression(paste(N)))+
+  theme(panel.grid=element_blank(),
+        aspect.ratio=1,
+        #axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.position="none",
+        plot.title=element_text(size=8))+
+  ggtitle(expression(paste(sigma==10,",  ",alpha==0.05," (t-test)")))
+
+(p.contour.r1 | p.contour.d1 | p.contour.d1t) / (p.contour.r2 | p.contour.d2 | p.contour.d2t + theme(legend.position="right"))
+```
