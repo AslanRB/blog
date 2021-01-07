@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Aslan Bellmann</title>
+    <title>Posts on Informative Science</title>
     <link>/post/</link>
-    <description>Recent content in Posts on Aslan Bellmann</description>
+    <description>Recent content in Posts on Informative Science</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 06 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 23 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>freqstats01</title>
+      <link>/post/freqstats01/</link>
+      <pubDate>Wed, 23 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/freqstats01/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>FreqStats 1</title>
       <link>/post/freqstats1/</link>

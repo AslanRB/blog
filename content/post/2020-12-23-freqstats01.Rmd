@@ -1,0 +1,1979 @@
+---
+title: freqstats01
+author: ''
+date: '2020-12-23'
+slug: freqstats01
+categories: []
+tags: []
+---
+
+```{r setup, include=F}
+# Chunk Options
+knitr::opts_chunk$set(echo=F, message=F, warning=F,
+                      fig.align="center", fig.width=5, fig.height=2)
+
+# Packages
+library(knitr); library(tidyverse); library(patchwork);
+
+# Colors
+col.red = "#800000"
+col.vio = "#440063"
+col.ora = "#ff6600"
+filler  = 0.65
+```
+
+```{r coin flips, fig.height=2, fig.width=5}
+set.seed(2020)
+flips = 1000; tails = rbinom(flips,1,0.5); ctails = vector(length=flips)
+for(i in seq_along(tails)){ctails[i] = mean(tails[1:i])}
+
+data.frame(index=1:flips, ctails) %>%
+  ggplot(aes(x=index, y=ctails))+
+  geom_hline(size=0.5, yintercept=0.5, color="red", linetype="dashed")+
+  geom_line(size=0.5, color="black")+
+  scale_x_continuous(name="# Coin Flips", limits=c(1,flips), breaks=c(1,round(flips/2),flips))+
+  scale_y_continuous(name="Proportion Tails", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  theme_bw()+
+  ggtitle("1000 Coin Flips")+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        strip.background=element_blank(),
+        strip.text=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank())
+```
+
+```{r coin flips 1, fig.height=2, fig.width=5}
+set.seed(2020)
+flips = 6; outcome = rbinom(flips,1,0.5);
+
+data.frame(index=1:flips, outcome) %>%
+  ggplot(aes(x=index, y=outcome))+
+  geom_point(size=2, shape=21, color="black", fill="black")+
+  scale_x_continuous(name="Run #", limits=c(0,flips), breaks=1:flips)+
+  scale_y_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,1))+
+  theme_bw()+
+  ggtitle("1 Run = 1 Flip")+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        strip.background=element_blank(),
+        strip.text=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank()) |
+
+data.frame(x=(0:1)/1, y=dbinom(0:1,1,0.5)) %>%
+  ggplot(aes(x=x, y=y, group=x))+
+  geom_segment(aes(x=x, xend=x, y=0, yend=y))+
+  coord_flip()+
+  theme_bw()+
+  scale_x_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,1))+
+  scale_y_continuous(name="Frequency", limits=c(0,0.55), breaks=c(0,0.5))+
+  theme_bw()+
+  ggtitle(expression(paste(infinity," Runs")))+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=1)
+```
+
+```{r coin flips 5, fig.height=2, fig.width=5}
+set.seed(2020)
+flips = 10; runs = 6; outcome = replicate(runs, rbinom(flips,1,0.5)); cprop = index = outcome;
+for(f in 1:flips) for(r in 1:runs) {cprop[f,r] = mean(outcome[1:f,r]); index[f,r] = r + (f-flips)*0.8/flips}
+
+data.frame(index=as.vector(index), outcome=as.vector(cprop), run=as.factor(rep(1:runs,each=flips))) %>%
+  ggplot(aes(x=index, y=outcome, group=run))+
+  geom_line(size=0.5, color="black")+
+  geom_point(size=1, shape=21, color="black", fill="white")+
+  geom_point(size=2, shape=21, color="black", fill="black", aes(x=ifelse(index%%1==0,index,NA), y=outcome))+
+  scale_x_continuous(name="Run #", limits=c(0,runs), breaks=1:runs)+
+  scale_y_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  theme_bw()+
+  ggtitle("1 Run = 10 Flips")+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        strip.background=element_blank(),
+        strip.text=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank()) |
+
+data.frame(x=(0:flips)/flips, y=dbinom(0:flips,flips,0.5)) %>%
+  ggplot(aes(x=x, y=y, group=x))+
+  geom_segment(aes(x=x, xend=x, y=0, yend=y))+
+  coord_flip()+
+  theme_bw()+
+  scale_x_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  scale_y_continuous(name="Frequency", limits=c(0,0.55), breaks=c(0,0.5))+
+  theme_bw()+
+  ggtitle(expression(paste(infinity," Runs")))+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=1)
+```
+
+```{r inference, fig.height=2.5, fig.width=5.5} 
+set.seed(2020)
+ggplot()+
+  theme_void()+
+  coord_cartesian(xlim=c(-1,1), ylim=c(0,1))+
+  # Boxes
+  annotate("rect", xmin=c(-1,0.1), xmax=c(-0.1,1), ymin=c(0.1,0.3), ymax=c(0.9,0.7), color="black", fill=NA, size=0.5)+
+  geom_segment(aes(y=0.12, yend=0.08, x=-1*seq(0.1,1,0.05), xend=-1*seq(0.1,1,0.05)))+
+  geom_segment(aes(y=0.32, yend=0.28, x=1*seq(0.1,1,0.05), xend=1*seq(0.1,1,0.05)))+
+  annotate("text", label="X", hjust=0.5, vjust=1, y=c(0.08,0.28), x=c(-0.55, 0.55))+
+  # Population
+  geom_ribbon(aes(x=seq(-0.9,-0.2,0.001), ymax=dnorm(seq(-0.9,-0.2,0.001),-0.55,0.1)/20+0.4, ymin=0.4), color="gray70", fill="gray70", size=1)+
+  geom_segment(aes(y=0.4, yend=max(dnorm(seq(-0.9,-0.2,0.001),-0.55,0.1)/20+0.4), x=-0.55, xend=-0.55), linetype="dashed")+
+  annotate("text", label=expression(mu), hjust=0.5, vjust=1, x=-0.55, y=0.38)+
+  annotate("text", label=expression(paste("Some hypothesis or question about ", mu,"...")), hjust=0.5, vjust=1, x=-0.55, y=0.85, size=3)+
+  annotate("text", label=expression(paste("...some inference about ", mu,".")), hjust=0.5, vjust=1, x=-0.55, y=0.25, size=3)+
+  annotate("text", label=expression(paste(mu," (mean)")), hjust=0, vjust=1, x=-0.9, y=0.58, size=3)+
+  annotate("text", label=expression(paste(sigma," (stdev)")), hjust=0, vjust=1, x=-0.9, y=0.52, size=3)+
+  #Sample
+  geom_point(aes(x=rnorm(12,0.55,0.1), y=rnorm(12,0.45,0.015)), shape=21, size=2, color="black", fill="gray70")+
+  geom_point(aes(x=0.57, y=0.45), shape=22, size=3, color="black", fill="black")+
+  geom_segment(aes(x=0.57, xend=0.57, y=0.5, yend=0.4))+
+  annotate("text", label="m", hjust=0.5, vjust=1, x=0.57, y=0.4, size=3)+
+  annotate("text", label=expression(paste("m (mean)")), hjust=0, vjust=1, x=0.75, y=0.66, size=3)+
+  annotate("text", label=expression(paste("s  (stdev)")), hjust=0, vjust=1, x=0.75, y=0.60, size=3)+
+  # Outside the Boxes
+  annotate("text", label="POPULATION", hjust=0.5, vjust=0, x=-0.55, y=0.95, size=3)+
+  annotate("text", label="RANDOM SAMPLE OF SIZE N", hjust=0.5, vjust=0, x=0.55, y=0.75, size=3)+
+  geom_curve(aes(x=-0.1, xend=0.1, y=0.8, yend=0.7), size=1, arrow=arrow(length=unit(0.2, "cm")), curvature=-0.2, ncp=100)+
+  geom_curve(aes(x=0.1, xend=-0.1, y=0.3, yend=0.2), size=1, arrow=arrow(length=unit(0.2, "cm")), curvature=-0.2, ncp=100)
+```
+
+```{r samples, fig.height=2.5, fig.width=4}
+set.seed(2020)
+mu=0; sigma=10; N=c(5, 15, 50); sem=sigma/sqrt(N); ns=8
+
+samples = rbind(data.frame(x=as.vector(replicate(ns, rnorm(N[1],mu,sigma))), y=rep((1:ns),each=N[1]), n=rep("N = 5", N[1]*ns)),
+                data.frame(x=as.vector(replicate(ns, rnorm(N[2],mu,sigma))), y=rep((1:ns),each=N[2]), n=rep("N = 15",N[2]*ns)),
+                data.frame(x=as.vector(replicate(ns, rnorm(N[3],mu,sigma))), y=rep((1:ns),each=N[3]), n=rep("N = 50",N[3]*ns)))
+
+means = samples %>%
+  group_by(y, n) %>%
+  summarize(x = mean(x)) %>%
+  as.data.frame()
+
+ggplot(data=means, aes(x=x, y=y, color=n, fill=n))+
+  facet_grid(.~n)+
+  scale_color_manual(values=c(col.vio,col.red,col.ora))+
+  scale_fill_manual(values=c(col.vio,col.red,col.ora))+
+  geom_segment(aes(x=mu,xend=mu,y=0.5,yend=ns+0.5), color="black", linetype="dashed")+
+  annotate("text", size=4, hjust=0.5, vjust=1, x=mu, y=0.4, label=expression(mu))+
+  geom_point(data=samples, aes(x=x, y=y), shape=21, size=3, color="gray70", fill="gray70", alpha=0.5)+
+  geom_point(data=means, aes(x=x, y=y, color=n, shape=n), shape=22, size=3)+
+  scale_x_continuous(name=expression(paste("Distance from ",mu)), limits=c(mu-3.5*sigma,mu+3.5*sigma))+
+  scale_y_continuous(name="Sample #", limit=c(0,ns+0.5), breaks=1:ns)+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        legend.position="none")
+```
+
+```{r samdists, fig.height=2, fig.width=5}
+set.seed(2020)
+mu=0; sigma=10; N=c(5, 15, 50); sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-35,35); xbrks=seq(-20,20,20); ylims=c(-0.05,0.5); ybrks=NULL; ratio=50
+
+
+popdis  = data.frame(x = range(mu,sigma,0.1), y = dnorm(range(mu,sigma,0.1),mu,sigma))
+samdis1 = data.frame(x = range(mu,sem[1],0.1), y = dnorm(range(mu,sem[1],0.1),mu,sem[1])) 
+samdis2 = data.frame(x = range(mu,sem[2],0.1), y = dnorm(range(mu,sem[2],0.1),mu,sem[2])) 
+samdis3 = data.frame(x = range(mu,sem[3],0.1), y = dnorm(range(mu,sem[3],0.1),mu,sem[3]))
+
+ggplot(mapping=aes(x=x,y=y))+
+  geom_area(data=popdis, size=1, color="gray70", fill="gray70", alpha=0.2)+
+  #annotate("rect", xmin=min(popdis$x), xmax=max(popdis$x), ymin=0, ymax=max(samdis3$y), color="white", fill="white", alpha=0.8)+
+  geom_area(data=samdis1, size=1, color=col.vio, fill=NA)+
+  geom_area(data=samdis2, size=1, color=col.red, fill=NA)+
+  geom_area(data=samdis3, size=1, color=col.ora, fill=NA)+
+  geom_segment(aes(x=mu, xend=mu, y=-0.01, yend=max(samdis3$y)), linetype="dashed")+
+  annotate("text", size=4, hjust=0.5, vjust=1, x=mu, y=-0.01, label=expression(mu))+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu)))+
+  scale_y_continuous(breaks=ybrks, name=expression(paste("Probability Density")))+
+  theme_bw()+
+  theme(panel.grid=element_blank(),
+        axis.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        #axis.title.y=element_blank()
+  )+
+  
+  annotate("rect", xmin=-35, xmax=-32, ymin=0.04, ymax=0.10, size=1, color="gray70", fill="gray70", alpha=0.2)+
+  annotate("text", hjust=0, vjust=0.5, x=-31, y=0.07, size=3, label=expression(paste("Normal (",mu,", ",sigma^2,")")))+
+  annotate("text", hjust=0, vjust=0, x=-35, y=0.12, size=3, label=expression(bold("Population")))+
+  
+  annotate("rect", xmin=-35, xmax=-32, ymin=0.18, ymax=0.24, size=1, color=col.ora, fill=NA, alpha=0.2)+
+  annotate("text", hjust=0, vjust=0.5, x=-31, y=0.21, size=3, label=expression(paste("N = 50")))+
+  annotate("rect", xmin=-35, xmax=-32, ymin=0.26, ymax=0.32, size=1, color=col.red, fill=NA, alpha=0.2)+
+  annotate("text", hjust=0, vjust=0.5, x=-31, y=0.29, size=3, label=expression(paste("N = 15")))+
+  annotate("rect", xmin=-35, xmax=-32, ymin=0.34, ymax=0.40, size=1, color=col.vio, fill=NA, alpha=0.2)+
+  annotate("text", hjust=0, vjust=0.5, x=-31, y=0.37, size=3, label=expression(paste("N = 5")))+
+  annotate("text", hjust=0, vjust=0, x=-35, y=0.42, size=3, label=expression(bold("Sampling Distribution of m")))+
+  
+  geom_segment(aes(x=-23, xend=-23, y=0.17, yend=0.40))+
+  geom_segment(aes(x=-24, xend=-23, y=0.17, yend=0.17))+
+  geom_segment(aes(x=-24, xend=-23, y=0.40, yend=0.40))+
+  annotate("text", hjust=0, vjust=0.5, x=-22, y=0.29, size=3, label=expression(paste("Normal (",mu,", ",sigma^2/N,")")))
+
+```
+
+```{r rej pre-data, fig.height=4, fig.width=5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-16,16); xbrks=seq(-10,10,10); ylims=c(0,0.2); ybrks=NULL; ratio=25
+
+alpha = 0.05
+
+samdis = data.frame(x = range(mu,sem,0.1),
+                    y = dnorm(range(mu,sem,0.1),mu,sem))
+
+reject.r = qnorm(alpha,0,sem,lower.tail=F)
+reject.l = qnorm(alpha,0,sem,lower.tail=T)
+reject.t = c(qnorm(alpha/2,0,sem,lower.tail=T), qnorm(alpha/2,0,sem,lower.tail=F))
+
+p.ar = ggplot(samdis, aes(x=x, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject.r,x,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=reject.r)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0],"    (Is ",mu," greater than ",mu[0]," ?)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.14, ymax=0.14+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.14+0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  geom_curve(aes(x=reject.r, xend=xlims[2], y=0.05, yend=0.05), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.r+0.25, y=0.055, label=expression(paste("unexpected; ",H[0])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.16, ymax=1, color="white", fill="white")+
+  geom_curve(aes(x=reject.r, xend=reject.r-(xlims[2]-reject.r), y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.r-0.25, y=0.165, label=expression(paste("expected; ",H[0])))
+
+p.al = ggplot(samdis, aes(x=x, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject.l,x,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=reject.l)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0],"    (Is ",mu," smaller than ",mu[0]," ?)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.14, ymax=0.14+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.14+0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  geom_curve(aes(x=reject.l, xend=xlims[1], y=0.05, yend=0.05), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.l-0.25, y=0.055, label=expression(paste("unexpected; ",H[0])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.16, ymax=1, color="white", fill="white")+
+  geom_curve(aes(x=reject.l, xend=reject.l+(xlims[2]-reject.r), y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.l+0.25, y=0.165, label=expression(paste("expected; ",H[0])))
+
+p.at = ggplot(samdis, aes(x=x, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject.t[1],x,NA), y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject.t[2],x,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=reject.t)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"    (Is ",mu," different from ",mu[0]," ?)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.14, ymax=0.14+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.14+0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  geom_curve(aes(x=reject.t[2], xend=xlims[2], y=0.05, yend=0.05), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.t[2]+0.25, y=0.055, label=expression(paste("unexpected; ",H[0])))+
+  geom_curve(aes(x=reject.t[1], xend=xlims[1], y=0.05, yend=0.05), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.t[1]-0.25, y=0.055, label=expression(paste("unexpected; ",H[0])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.16, ymax=1, color="white", fill="white")+
+  geom_curve(aes(x=reject.t[2], xend=reject.t[1], y=0.16, yend=0.16), size=0.5, curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0.5, vjust=0, x=0, y=0.165, label=expression(paste("expected; ",H[0])))
+
+p.ar / p.al / p.at
+
+```
+
+```{r rej post-data, fig.height=4.75, fig.width=5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-16,16); xbrks=seq(-10,10,10); ylims=c(0,0.2); ybrks=NULL; ratio=25
+
+p = c(0.1, 0.9)
+
+samdis = data.frame(x = range(mu,sem,0.1),
+                    y = dnorm(range(mu,sem,0.1),mu,sem))
+
+i=0 #Cherrypick samples (currently not using sample2). 
+while(i==0){sample1 = rnorm(N,mu,sigma)
+  if(min(sample1)>=-10 & max(sample1)<=10 & sd(sample1)>=6){i=1}}
+while(i==1){sample2 = rnorm(N,mu,sigma)
+  if(min(sample2)>=-10 & max(sample2)<=10 & sd(sample2)>=6){i=2}}
+
+# Change sample means to get p-values. 
+sample1 = sample1 - mean(sample1) + qnorm(p[1],mu,sem,lower.tail=T)
+sample2 = sample2 - mean(sample2) + qnorm(p[2],mu,sem,lower.tail=T)
+
+sample = sample1; m = mean(sample1)
+
+
+p.s1 = ggplot()+
+  geom_point(aes(x=sample+runif(N,-0.5,0.5), y=0), shape=21, size=3, color="gray70", fill="gray70", alpha=0.5)+
+  geom_vline(xintercept=m)+
+  geom_point(aes(x=m, y=0), shape=22, size=3, color=col.red, fill=col.red)+
+  # Design
+  coord_fixed(ratio=0.9, xlim=xlims, ylim=c(-1,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(italic("Sample (N=15)")))
+
+p.rp1 = ggplot(samdis, aes(x=x, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>m,x,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.10-1/ratio, ymax=0.10)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.10-0.5/ratio, label="p = 0.9 = ")+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.16, ymax=1, color="white", fill="white")+
+  geom_curve(aes(x=m, xend=m+abs(xlims[1]-m), y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=m+0.25, y=0.165, label=expression(paste("larger")))
+
+p.lp1 = ggplot(samdis, aes(x=x, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<m,x,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.10-1/ratio, ymax=0.10)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.10-0.5/ratio, label="p = 0.1 = ")+
+  geom_curve(aes(x=m, xend=xlims[1], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=m-0.25, y=0.165, label=expression(paste("smaller")))
+
+p.tp1 = ggplot(samdis, aes(x=x, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<m,x,NA), y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>-m,x,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=-m, linetype="dotted")+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.10-1/ratio, ymax=0.10)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.10-0.5/ratio, label="p = 0.2 = ")+
+  geom_curve(aes(x=m, xend=xlims[1], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=m-0.25, y=0.165, label=expression(paste("more distant from ",H[0])))+
+  geom_curve(aes(x=-m, xend=xlims[2], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=-m+0.25, y=0.165, label=expression(paste("more distant from ",H[0])))
+
+p.s1 / p.rp1 / p.lp1 / p.tp1
+```
+
+```{r p curve, fig.height=4.2, fig.width=7.5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-16,16); xbrks=seq(-10,10,10); ylims=c(0,0.2); ybrks=NULL; ratio=25
+
+getmu0 <- function(p, m, sem, tail="l", twoside=F){
+  if(twoside==T){p = p/2}
+  if(tail=="l"){mu0 = qnorm(p,m,sem,lower.tail=F)}
+  else if(tail=="r"){mu0 = qnorm(p,m,sem,lower.tail=T)}
+  return(mu0)}
+
+sample = sample; samdis = samdis; p.s = p.s1 #from previous
+m = mean(sample)
+mu01 = getmu0(0.3,m,sem,"r") #can just re-use these
+mu02 = getmu0(0.7,m,sem,"r")
+
+pc = data.frame(x=seq(xlims[1],xlims[2],0.1)) %>%
+  rowwise() %>% #so dplyr operates on individual rows
+  mutate(yl = pnorm(x,m,sem,lower.tail=F)) %>%
+  mutate(yr = pnorm(x,m,sem,lower.tail=T)) %>%
+  mutate(yt = min(yl,yr)*2)
+
+p.r1 = ggplot(samdis, aes(x=x+mu01, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu01>m,x+mu01,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=mu01, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label="p = 0.3 = ")
+
+p.r2 = ggplot(samdis, aes(x=x+mu02, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu02>m,x+mu02,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=mu02, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label="p = 0.7 = ")
+
+p.l1 = ggplot(samdis, aes(x=x+mu01, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu01<m,x+mu01,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=mu01, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label="p = 0.7 = ")
+
+p.l2 = ggplot(samdis, aes(x=x+mu02, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu02<m,x+mu02,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=mu02, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label="p = 0.3 = ")
+
+p.t1 = ggplot(samdis, aes(x=x+mu01, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu01>m,x+mu01,NA), y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu01<mu01-abs(m-mu01),x+mu01,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=mu01-abs(m-mu01), linetype="dotted")+
+  geom_vline(xintercept=mu01, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label="p = 0.6 = ")
+
+p.t2 = ggplot(samdis, aes(x=x+mu02, y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu02<m,x+mu02,NA), y=y))+
+  geom_area(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu02>mu02+abs(m-mu02),x+mu02,NA), y=y))+
+  geom_area(size=1, color=col.red, fill=NA)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=mu02+abs(m-mu02), linetype="dotted")+
+  geom_vline(xintercept=mu02, linetype="dashed")+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label="p = 0.6 = ")
+
+p.pcr = ggplot(pc, aes(x=x, y=yr))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=c(mu01,mu02), linetype="dashed")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu01, xend=xlims[1], y=0.3, yend=0.3), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu02, xend=xlims[1], y=0.7, yend=0.7), color="gray60")+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.pcl = ggplot(pc, aes(x=x, y=yl))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=c(mu01,mu02), linetype="dashed")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu01, xend=xlims[1], y=0.7, yend=0.7), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu02, xend=xlims[1], y=0.3, yend=0.3), color="gray60")+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.pct = ggplot(pc, aes(x=x, y=yt))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=c(mu01,mu02), linetype="dashed")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu01, xend=xlims[1], y=0.6, yend=0.6), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu02, xend=xlims[1], y=0.6, yend=0.6), color="gray60")+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+
+(p.s / p.r1 / p.r2 / p.pcr) | (p.s / p.l1 / p.l2 / p.pcl) | (p.s / p.t1 / p.t2 / p.pct)
+```
+
+```{r p ci intro, fig.height=4.2, fig.width=7.5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-16,16); xbrks=seq(-10,10,10); ylims=c(-0.12,0.2*2); ybrks=NULL; ratio=25
+
+sample = sample; samdis = samdis; pc = pc #from previous
+m = mean(sample)
+
+getmu0 <- function(p, m, sem, tail="l", twoside=F){
+  if(twoside==T){p = p/2}
+  if(tail=="l"){mu0 = qnorm(p,m,sem,lower.tail=F)}
+  else if(tail=="r"){mu0 = qnorm(p,m,sem,lower.tail=T)}
+  return(mu0)}
+
+alpha=0.05
+
+ci.r = getmu0(alpha,m,sem,"r")
+ci.l = getmu0(alpha,m,sem,"l")
+ci.t = c(getmu0(alpha,m,sem,"r",T),
+         getmu0(alpha,m,sem,"l",T))
+
+p.cir = ggplot()+
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=x+ci.r))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.r>m, x+ci.r, NA)))+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.r, linetype="dashed")+
+  geom_curve(aes(x=ci.r, xend=xlims[2], y=-0.08, yend=-0.08), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))
+
+p.cil = ggplot()+
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=x+ci.l))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.l<m, x+ci.l, NA)))+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.l, linetype="dashed")+
+  geom_curve(aes(x=ci.l, xend=xlims[1], y=-0.08, yend=-0.08), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))
+
+p.cit = ggplot()+
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=x+ci.t[1]))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.t[1]>m, x+ci.t[1], NA)))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.t[1]<ci.t[1]-abs(ci.t[1]-m), x+ci.t[1], NA)))+
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=x+ci.t[2]))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.t[2]<m, x+ci.t[2], NA)))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.t[2]>ci.t[2]+abs(ci.t[2]-m), x+ci.t[2], NA)))+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.t[1]-abs(ci.t[1]-m), linetype="dotted")+
+  geom_vline(xintercept=ci.t[2]+abs(ci.t[2]-m), linetype="dotted")+
+  geom_vline(xintercept=ci.t, linetype="dashed")+
+  geom_segment(aes(x=ci.t[1], xend=ci.t[2], y=-0.08, yend=-0.08), size=1.5, col=col.red)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))
+
+p.pcr = ggplot(pc, aes(x=x, y=yr))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.r, linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_curve(aes(x=ci.r, xend=xlims[2], y=alpha, yend=alpha), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.pcl = ggplot(pc, aes(x=x, y=yl))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.l, linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_curve(aes(x=ci.l, xend=xlims[1], y=alpha, yend=alpha), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.pct = ggplot(pc, aes(x=x, y=yt))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.t, linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_segment(aes(x=ci.t[1], xend=ci.t[2], y=alpha, yend=alpha), size=1.5, col=col.red)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+(p.s / p.cir / p.pcr) | (p.s / p.cil / p.pcl) | (p.s / p.cit / p.pct)
+```
+
+```{r p ci, fig.height=4.2, fig.width=7.5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-16,16); xbrks=seq(-10,10,10); ylims=c(-0.12,0.2*2); ybrks=NULL; ratio=25
+
+sample = sample; samdis = samdis; pc = pc #from previous
+m = mean(sample)
+
+getmu0 <- function(p, m, sem, tail="l", twoside=F){
+  if(twoside==T){p = p/2}
+  if(tail=="l"){mu0 = qnorm(p,m,sem,lower.tail=F)}
+  else if(tail=="r"){mu0 = qnorm(p,m,sem,lower.tail=T)}
+  return(mu0)}
+
+alpha=0.05
+
+ci.r = getmu0(alpha,m,sem,"r")
+ci.l = getmu0(alpha,m,sem,"l")
+ci.t = c(getmu0(alpha,m,sem,"r",T),
+         getmu0(alpha,m,sem,"l",T))
+
+p.cir = ggplot()+
+  #p=1-alpha layer
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=x+ci.l))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.l>m, x+ci.l, NA)))+
+  annotate("rect", size=1, col=col.red, fill="white", alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste("1-p = ",alpha," = ")))+
+  annotate("rect", col="white", fill="white", alpha=0.5, xmin=-100, xmax=100, ymin=-100, ymax=100)+
+  #p=alpha
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=x+ci.r))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.r>m, x+ci.r, NA)))+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.r, linetype="dashed")+
+  geom_vline(xintercept=ci.l, linetype="dashed", alpha=filler)+
+  geom_curve(aes(x=ci.r, xend=xlims[2], y=-0.08, yend=-0.08), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))
+
+p.cil = ggplot()+
+  # 1-p=alpha
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=x+ci.r))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.r<m, x+ci.r, NA)))+
+  annotate("rect", size=1, col=col.red, fill="white", alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste("1-p = ",alpha," = ")))+
+  annotate("rect", col="white", fill="white", alpha=0.5, xmin=-100, xmax=100, ymin=-100, ymax=100)+
+  # p=alpha
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=x+ci.l))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.l<m, x+ci.l, NA)))+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.r, linetype="dashed", alpha=0.5)+
+  geom_vline(xintercept=ci.l, linetype="dashed")+
+  geom_curve(aes(x=ci.l, xend=xlims[1], y=-0.08, yend=-0.08), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))
+
+p.cit = ggplot()+
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=x+ci.t[1]))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.t[1]>m, x+ci.t[1], NA)))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.2, ymax=0.2+y, x=ifelse(x+ci.t[1]<ci.t[1]-abs(ci.t[1]-m), x+ci.t[1], NA)))+
+  geom_ribbon(size=1, color=col.red, fill=NA, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=x+ci.t[2]))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.t[2]<m, x+ci.t[2], NA)))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, data=samdis, aes(ymin=0.0, ymax=0.0+y, x=ifelse(x+ci.t[2]>ci.t[2]+abs(ci.t[2]-m), x+ci.t[2], NA)))+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.t[1]-abs(ci.t[1]-m), linetype="dotted")+
+  geom_vline(xintercept=ci.t[2]+abs(ci.t[2]-m), linetype="dotted")+
+  geom_vline(xintercept=ci.t, linetype="dashed")+
+  geom_segment(aes(x=ci.t[1], xend=ci.t[2], y=-0.08, yend=-0.08), size=1.5, col=col.red)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste("p = ",alpha," = ")))
+
+p.pcr = ggplot(pc, aes(x=x, y=yr))+
+  # 1-p layer
+  geom_vline(xintercept=ci.l, linetype="dashed")+
+  geom_hline(yintercept=1-alpha)+
+  geom_curve(aes(x=ci.l, xend=xlims[1], y=1-alpha, yend=1-alpha), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=1, x=xlims[2]-2, y=1-alpha-0.02, label=expression(1-alpha==0.95))+
+  annotate("rect", col="white", fill="white", alpha=0.5, xmin=-100, xmax=100, ymin=-100, ymax=100)+
+  # p layer
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.r, linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_curve(aes(x=ci.r, xend=xlims[2], y=alpha, yend=alpha), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2]-2, y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.pcl = ggplot(pc, aes(x=x, y=yl))+
+  # 1-p layer
+  geom_vline(xintercept=ci.r, linetype="dashed")+
+  geom_hline(yintercept=1-alpha)+
+  geom_curve(aes(x=ci.r, xend=xlims[2], y=1-alpha, yend=1-alpha), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=1, x=xlims[2]-2, y=1-alpha-0.02, label=expression(1-alpha==0.95))+
+  annotate("rect", col="white", fill="white", alpha=0.5, xmin=-100, xmax=100, ymin=-100, ymax=100)+
+  # p layer
+  geom_line(size=1, color=col.red, alpha=0.6)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.l, linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_curve(aes(x=ci.l, xend=xlims[1], y=alpha, yend=alpha), size=1.5, color=col.red, arrow=arrow(length=unit(0.2, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2]-2, y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.pct = ggplot(pc, aes(x=x, y=yt))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=m)+
+  geom_vline(xintercept=ci.t, linetype="dashed")+
+  geom_hline(yintercept=alpha)+
+  geom_segment(aes(x=ci.t[1], xend=ci.t[2], y=alpha, yend=alpha), size=1.5, col=col.red)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2]-2, y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name="p")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+(p.s / p.cir / p.pcr) | (p.s / p.cil / p.pcl) | (p.s / p.cit / p.pct)
+```
+
+```{r rej rate, fig.height=3.8, fig.width=7.5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-18,18); xbrks=seq(-10,10,10); ylims=c(0,0.2*4); ybrks=NULL; ratio=25
+
+samdis=samdis #from previous
+alpha=0.05
+
+# get rejection cutoffs
+reject.r = qnorm(alpha,0,sem,lower.tail=F)
+reject.l = qnorm(alpha,0,sem,lower.tail=T)
+reject.t = c(qnorm(alpha/2,0,sem,lower.tail=T), 
+             qnorm(alpha/2,0,sem,lower.tail=F))
+# get mu1
+beta = c(0.8, 0.4, 0.1)
+mu1.r = qnorm(beta,reject.r,sem,lower.tail=F)
+mu1.l = qnorm(beta,reject.l,sem,lower.tail=T)
+mu1.tl = qnorm(beta,reject.t[1],sem,lower.tail=T)
+mu1.tr = qnorm(beta,reject.t[2],sem,lower.tail=F)
+
+xrange = seq(xlims[1],xlims[2],0.1);
+
+rates = data.frame(x = xrange,
+                   power.r = pnorm(reject.r,xrange,sem,lower.tail=F),
+                   power.l = pnorm(reject.l,xrange,sem,lower.tail=T),
+                   power.t = pnorm(reject.t[1],xrange,sem,lower.tail=T) + pnorm(reject.t[2],xrange,sem,lower.tail=F)) %>%
+  rowwise() %>% mutate(beta.r = 1-power.r, beta.l = 1-power.l, beta.t = 1-power.t)
+
+p.r1 = ggplot(data=samdis)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject.r,x,NA), ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.r[1], ymin=0.2*2, ymax=y+0.2*2))+
+  geom_segment(aes(x=mu1.r[1], xend=mu1.r[1], y=max(samdis$y)+0.2*2, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.r[2], ymin=0.2*1, ymax=y+0.2*1))+
+  geom_segment(aes(x=mu1.r[2], xend=mu1.r[2], y=max(samdis$y)+0.2*1, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.r[3], ymin=0.2*0, ymax=y+0.2*0))+
+  geom_segment(aes(x=mu1.r[3], xend=mu1.r[3], y=max(samdis$y)+0.2*0, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.r[1]>reject.r,x+mu1.r[1],NA), ymin=0.2*2, ymax=y+0.2*2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.r[2]>reject.r,x+mu1.r[2],NA), ymin=0.2*1, ymax=y+0.2*1))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.r[3]>reject.r,x+mu1.r[3],NA), ymin=0.2*0, ymax=y+0.2*0))+
+  geom_vline(xintercept=reject.r)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=3*0.2+0.15-1/ratio, ymax=3*0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=3*0.2+0.15-0.5/ratio, label=expression(paste(alpha," = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=2*0.2+0.15-1/ratio, ymax=2*0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=2*0.2+0.15-0.5/ratio, label=expression(paste(1-beta(mu[1])," = ")))+
+  geom_segment(aes(x=xlims[1], xend=xlims[1]+4, y=ylims[2]-.02, yend=ylims[2]-.02), linetype="dashed")+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[1]+6, y=ylims[2]-.02, label=expression(mu[0]))+
+  geom_segment(aes(x=xlims[1], xend=xlims[1]+4, y=ylims[2]-.1, yend=ylims[2]-.1), linetype="dashed", color="red")+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[1]+6, y=ylims[2]-.1, label=expression(mu[1]))
+
+p.l1 = ggplot(samdis)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject.l,x,NA), ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.l[1], ymin=0.2*2, ymax=y+0.2*2))+
+  geom_segment(aes(x=mu1.l[1], xend=mu1.l[1], y=max(samdis$y)+0.2*2, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.l[2], ymin=0.2*1, ymax=y+0.2*1))+
+  geom_segment(aes(x=mu1.l[2], xend=mu1.l[2], y=max(samdis$y)+0.2*1, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.l[3], ymin=0.2*0, ymax=y+0.2*0))+
+  geom_segment(aes(x=mu1.l[3], xend=mu1.l[3], y=max(samdis$y)+0.2*0, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.l[1]<reject.l,x+mu1.l[1],NA), ymin=0.2*2, ymax=y+0.2*2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.l[2]<reject.l,x+mu1.l[2],NA), ymin=0.2*1, ymax=y+0.2*1))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.l[3]<reject.l,x+mu1.l[3],NA), ymin=0.2*0, ymax=y+0.2*0))+
+  geom_vline(xintercept=reject.l)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=3*0.2+0.15-1/ratio, ymax=3*0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=3*0.2+0.15-0.5/ratio, label=expression(paste(alpha," = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=2*0.2+0.15-1/ratio, ymax=2*0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=2*0.2+0.15-0.5/ratio, label=expression(paste(1-beta(mu[1])," = ")))+
+  geom_segment(aes(x=xlims[1], xend=xlims[1]+4, y=ylims[2]-.02, yend=ylims[2]-.02), linetype="dashed")+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[1]+6, y=ylims[2]-.02, label=expression(mu[0]))+
+  geom_segment(aes(x=xlims[1], xend=xlims[1]+4, y=ylims[2]-.1, yend=ylims[2]-.1), linetype="dashed", color="red")+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[1]+6, y=ylims[2]-.1, label=expression(mu[1]))
+
+p.t1 = ggplot(samdis, aes(x=x, y=y))+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject.t[1],x,NA), ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject.t[2],x,NA), ymin=0.2*3, ymax=y+0.2*3))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.tl[1], ymin=0.2*2, ymax=y+0.2*2))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.tr[1], ymin=0.2*2, ymax=y+0.2*2))+
+  geom_segment(aes(x=mu1.tl[1], xend=mu1.tl[1], y=max(samdis$y)+0.2*2, yend=-0.2), linetype="dashed", color="red")+
+  geom_segment(aes(x=mu1.tr[1], xend=mu1.tr[1], y=max(samdis$y)+0.2*2, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.tl[2], ymin=0.2*1, ymax=y+0.2*1))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.tr[2], ymin=0.2*1, ymax=y+0.2*1))+
+  geom_segment(aes(x=mu1.tl[2], xend=mu1.tl[2], y=max(samdis$y)+0.2*1, yend=-0.2), linetype="dashed", color="red")+
+  geom_segment(aes(x=mu1.tr[2], xend=mu1.tr[2], y=max(samdis$y)+0.2*1, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.tl[3], ymin=0.2*0, ymax=y+0.2*0))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1.tr[3], ymin=0.2*0, ymax=y+0.2*0))+
+  geom_segment(aes(x=mu1.tl[3], xend=mu1.tl[3], y=max(samdis$y)+0.2*0, yend=-0.2), linetype="dashed", color="red")+
+  geom_segment(aes(x=mu1.tr[3], xend=mu1.tr[3], y=max(samdis$y)+0.2*0, yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tl[1]<reject.t[1],x+mu1.tl[1],NA), ymin=0.2*2, ymax=y+0.2*2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tr[1]>reject.t[2],x+mu1.tr[1],NA), ymin=0.2*2, ymax=y+0.2*2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tl[2]<reject.t[1],x+mu1.tl[2],NA), ymin=0.2*1, ymax=y+0.2*1))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tr[2]>reject.t[2],x+mu1.tr[2],NA), ymin=0.2*1, ymax=y+0.2*1))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tl[3]<reject.t[1],x+mu1.tl[3],NA), ymin=0.2*0, ymax=y+0.2*0))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tr[3]>reject.t[2],x+mu1.tr[3],NA), ymin=0.2*0, ymax=y+0.2*0))+
+  geom_vline(xintercept=reject.t)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=3*0.2+0.15-1/ratio, ymax=3*0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=3*0.2+0.15-0.5/ratio, label=expression(paste(alpha," = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=2*0.2+0.15-1/ratio, ymax=2*0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=2*0.2+0.15-0.5/ratio, label=expression(paste(1-beta(mu[1])," = ")))+
+  geom_segment(aes(x=xlims[1], xend=xlims[1]+4, y=ylims[2]-.02, yend=ylims[2]-.02), linetype="dashed")+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[1]+6, y=ylims[2]-.02, label=expression(mu[0]))+
+  geom_segment(aes(x=xlims[1], xend=xlims[1]+4, y=ylims[2]-.1, yend=ylims[2]-.1), linetype="dashed", color="red")+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[1]+6, y=ylims[2]-.1, label=expression(mu[1]))
+
+p.r2 = ggplot(rates, aes(x=x, y=power.r))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_vline(xintercept=mu1.r, linetype="dashed", color="red")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.r[1], xend=xlims[1], y=1-beta[1], yend=1-beta[1]), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.r[2], xend=xlims[1], y=1-beta[2], yend=1-beta[2]), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.r[3], xend=xlims[1], y=1-beta[3], yend=1-beta[3]), color="gray60")+
+  geom_hline(yintercept=alpha)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu)))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name=expression(paste("Rej-Rate(",mu,")")))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.l2 = ggplot(rates, aes(x=x, y=power.l))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_vline(xintercept=mu1.l, linetype="dashed", color="red")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.l[1], xend=xlims[1], y=1-beta[1], yend=1-beta[1]), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.l[2], xend=xlims[1], y=1-beta[2], yend=1-beta[2]), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.l[3], xend=xlims[1], y=1-beta[3], yend=1-beta[3]), color="gray60")+
+  geom_hline(yintercept=alpha)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu)))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name=expression(paste("Rej-Rate(",mu,")")))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.t2 = ggplot(rates, aes(x=x, y=power.t))+
+  geom_line(size=1, color=col.red, alpha=filler)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_vline(xintercept=c(mu1.tl,mu1.tr), linetype="dashed", color="red")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.tr[1], xend=xlims[1], y=1-beta[1], yend=1-beta[1]), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.tr[2], xend=xlims[1], y=1-beta[2], yend=1-beta[2]), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1.tr[3], xend=xlims[1], y=1-beta[3], yend=1-beta[3]), color="gray60")+
+  geom_hline(yintercept=alpha)+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste(mu)))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name=expression(paste("Rej-Rate(",mu,")")))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+(p.r1 / p.r2) | (p.l1 / p.l2) | (p.t1 / p.t2)
+```
+
+```{r rej pre-data updated, fig.height=5.5, fig.width=5}
+set.seed(2020)
+mu=0; sigma=10; N=15; sem=sigma/sqrt(N)
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-22,22); xbrks=seq(-10,10,10); ylims=c(0,0.25+0.2); ybrks=NULL; ratio=25
+
+samdis=samdis #from previous
+alpha=0.05
+
+# get rejection cutoffs
+reject.r = qnorm(alpha,0,sem,lower.tail=F)
+reject.l = qnorm(alpha,0,sem,lower.tail=T)
+reject.t = c(qnorm(alpha/2,0,sem,lower.tail=T), 
+             qnorm(alpha/2,0,sem,lower.tail=F))
+# get mu1
+beta = alpha
+mu1.r = qnorm(beta,reject.r,sem,lower.tail=F)
+mu1.l = qnorm(beta,reject.l,sem,lower.tail=T)
+mu1.tl = qnorm(beta,reject.t[1],sem,lower.tail=T)
+mu1.tr = qnorm(beta,reject.t[2],sem,lower.tail=F)
+
+p.r = ggplot(samdis)+
+  # Distribution mu0
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.25, ymax=y+0.25))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject.r,x,NA), ymin=0.25, ymax=y+0.25))+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Distribution mu1
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x+mu1.r, ymin=0.0, ymax=y+0.0))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.r>reject.r,x+mu1.r,NA), ymin=0.0, ymax=y+0.0))+
+  geom_segment(aes(x=mu1.r, xend=mu1.r, y=max(samdis$y), yend=-1), linetype="dashed", color="red")+
+  # Rejection cutoff
+  geom_vline(xintercept=reject.r)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu<=mu[0],",  ",H[1],": ",mu>mu[0],"    (Is ",mu," greater than ",mu[0]," ?)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.25+0.14, ymax=0.25+0.14+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.25+0.14+0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  geom_curve(aes(x=reject.r, xend=xlims[2], y=0.25+0.05, yend=0.25+0.05), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.r+0.255, y=0.25+0.055, label=expression(paste("unexpected; ",H[0])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.25+0.16, ymax=0.25+1, color="white", fill="white")+
+  geom_curve(aes(x=reject.r, xend=reject.r-(xlims[2]-reject.r), y=0.25+0.16, yend=0.25+0.16), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.r-0.255, y=0.25+0.165, label=expression(paste("expected; ",H[0])))+
+  #mu1 annotations
+  annotate("rect", size=1, col=col.red, fill="white", alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.06, ymax=0.06+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.06+0.5/ratio, label=expression(paste(beta(mu[1])," = ",alpha," = ")))+
+  geom_curve(aes(x=reject.r, xend=xlims[2], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.r+0.255, y=0.165, label=expression(paste("expected; ",mu[1])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.05, ymax=0.09, color="white", fill="white")+
+  geom_curve(aes(x=reject.r, xend=reject.r-(xlims[2]-reject.r), y=0.05, yend=0.05), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.r-0.255, y=0.055, label=expression(paste("unexpected; ",mu[1])))
+
+p.l = ggplot(samdis)+
+  # Distribution mu0
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.25, ymax=y+0.25))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject.l,x,NA), ymin=0.25, ymax=y+0.25))+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Distribution mu1
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x+mu1.l, ymin=0.0, ymax=y+0.0))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.l<reject.l,x+mu1.l,NA), ymin=0.0, ymax=y+0.0))+
+  geom_segment(aes(x=mu1.l, xend=mu1.l, y=max(samdis$y), yend=-1), linetype="dashed", color="red")+
+  # Rejection cutoff
+  geom_vline(xintercept=reject.l)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu>=mu[0],",  ",H[1],": ",mu<mu[0],"    (Is ",mu," smaller than ",mu[0]," ?)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.25+0.14, ymax=0.25+0.14+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.25+0.14+0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  geom_curve(aes(x=reject.l, xend=xlims[1], y=0.25+0.05, yend=0.25+0.05), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.l-0.255, y=0.25+0.055, label=expression(paste("unexpected; ",H[0])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.25+0.16, ymax=0.25+1, color="white", fill="white")+
+  geom_curve(aes(x=reject.l, xend=reject.l+(xlims[2]-reject.r), y=0.25+0.16, yend=0.25+0.16), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.l+0.255, y=0.25+0.165, label=expression(paste("expected; ",H[0])))+
+  #mu1 annotations
+  annotate("rect", size=1, col=col.red, fill="white", alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.06, ymax=0.06+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.06+0.5/ratio, label=expression(paste(beta(mu[1])," = ",alpha," = ")))+
+  geom_curve(aes(x=reject.l, xend=xlims[1], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.l-0.255, y=0.165, label=expression(paste("expected; ",mu[1])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.05, ymax=0.09, color="white", fill="white")+
+  geom_curve(aes(x=reject.l, xend=reject.l+(xlims[2]-reject.r), y=0.05, yend=0.05), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.l+0.255, y=0.055, label=expression(paste("unexpected; ",mu[1])))
+  
+
+p.t = ggplot(samdis)+
+  # Distribution mu0
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.25, ymax=y+0.25))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject.t[1],x,NA), ymin=0.25, ymax=y+0.25))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject.t[2],x,NA), ymin=0.25, ymax=y+0.25))+
+  geom_vline(xintercept=0, linetype="dashed")+
+  # Distribution mu1
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x+mu1.tl, ymin=0.0, ymax=y+0.0))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tl<reject.t[1],x+mu1.tl,NA), ymin=0.0, ymax=y+0.0))+
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x+mu1.tr, ymin=0.0, ymax=y+0.0))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1.tr>reject.t[2],x+mu1.tr,NA), ymin=0.0, ymax=y+0.0))+
+  geom_segment(aes(x=mu1.tl, xend=mu1.tl, y=max(samdis$y), yend=-1), linetype="dashed", color="red")+
+  geom_segment(aes(x=mu1.tr, xend=mu1.tr, y=max(samdis$y), yend=-1), linetype="dashed", color="red")+
+  # Rejection cutoff
+  geom_vline(xintercept=reject.t)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims)+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"    (Is ",mu," different from ",mu[0]," ?)")))+
+  # mu0 annotations
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.25+0.14, ymax=0.25+0.14+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.25+0.14+0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  geom_curve(aes(x=reject.t[2], xend=xlims[2], y=0.25+0.05, yend=0.25+0.05), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.t[2]+0.255, y=0.25+0.055, label=expression(paste("unexpected; ",H[0])))+
+  geom_curve(aes(x=reject.t[1], xend=xlims[1], y=0.25+0.05, yend=0.25+0.05), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.t[1]-0.255, y=0.25+0.055, label=expression(paste("unexpected; ",H[0])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.25+0.16, ymax=0.25+1, color="white", fill="white")+
+  geom_curve(aes(x=reject.t[2], xend=reject.t[1], y=0.25+0.16, yend=0.25+0.16), size=0.5, curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0.5, vjust=0, x=0, y=0.25+0.165, label=expression(paste("expected; ",H[0])))+
+  #mu1 annotations
+  annotate("rect", size=1, col=col.red, fill="white", alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.06, ymax=0.06+1/ratio)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.06+0.5/ratio, label=expression(paste(beta(mu[1])," = ",alpha," = ")))+
+  geom_curve(aes(x=reject.t[2], xend=xlims[2], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0, vjust=0, x=reject.t[2]+0.255, y=0.165, label=expression(paste("expected; ",mu[1])))+
+  geom_curve(aes(x=reject.t[1], xend=xlims[1], y=0.16, yend=0.16), size=0.5, arrow=arrow(length=unit(0.25, "cm")), curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=1, vjust=0, x=reject.t[1]-0.255, y=0.165, label=expression(paste("expected; ",mu[1])))+
+  annotate("rect", size=0.5, xmin=0, xmax=0, ymin=0.05, ymax=0.09, color="white", fill="white")+
+  geom_curve(aes(x=reject.t[2], xend=reject.t[1], y=0.05, yend=0.05), size=0.5, curvature=0, ncp=100)+
+  annotate("text", size=3, hjust=0.5, vjust=0, x=0, y=0.055, label=expression(paste("unexpected; ",mu[1])))
+  
+
+p.r / p.l / p.t
+```
+
+```{r rej rate n alpha, fig.height=5}
+set.seed(2020)
+mu=0;
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+xlims=c(-12,18); xbrks=seq(-10,10,10); ylims1=c(0,0.2*2); ylims2=c(0,0.32*2); ybrks=NULL; ratio=25
+
+sigma=10; N=c(15,50); sem=sigma/sqrt(N);
+samdis = data.frame(x  = range(mu,max(sem),0.1),
+                    y1 = dnorm(range(mu,max(sem),0.1),mu,sem[1]),
+                    y2 = dnorm(range(mu,max(sem),0.1),mu,sem[2]))
+
+samdis1 = data.frame(x = range(mu,sem[1],0.1),
+                     y = dnorm(range(mu,sem[1],0.1),mu,sem[1]))
+samdis2 = data.frame(x = range(mu,sem[2],0.1),
+                     y = dnorm(range(mu,sem[2],0.1),mu,sem[2]))
+
+alpha=c(0.05,0.2)
+reject1 = c(qnorm(alpha[1]/2,0,sem[1],lower.tail=T),
+            qnorm(alpha[1]/2,0,sem[1],lower.tail=F))
+reject2 = c(qnorm(alpha[1]/2,0,sem[2],lower.tail=T),
+            qnorm(alpha[1]/2,0,sem[2],lower.tail=F))
+
+mu1=4; xbrks=c(xbrks,mu1)
+pow1 = pnorm(reject1[2],mu1,sem[1],lower.tail=F)
+pow2 = pnorm(reject2[2],mu1,sem[2],lower.tail=F)
+
+xrange = seq(xlims[1],xlims[2],0.1);
+rates = data.frame(x = xrange,
+                   power.1 = pnorm(reject1[1],xrange,sem[1],lower.tail=T) + pnorm(reject1[2],xrange,sem[1],lower.tail=F),
+                   power.2 = pnorm(reject2[1],xrange,sem[2],lower.tail=T) + pnorm(reject2[2],xrange,sem[2],lower.tail=F))
+
+reject1b = c(qnorm(alpha[2]/2,0,sem[1],lower.tail=T),
+             qnorm(alpha[2]/2,0,sem[1],lower.tail=F))
+reject2b = c(qnorm(alpha[2]/2,0,sem[2],lower.tail=T),
+             qnorm(alpha[2]/2,0,sem[2],lower.tail=F))
+
+pow1b = pnorm(reject1b[2],mu1,sem[1],lower.tail=F)
+pow2b = pnorm(reject2b[2],mu1,sem[2],lower.tail=F)
+
+ratesb = data.frame(x = xrange,
+                   power.1 = pnorm(reject1b[1],xrange,sem[1],lower.tail=T) + pnorm(reject1b[2],xrange,sem[1],lower.tail=F),
+                   power.2 = pnorm(reject2b[1],xrange,sem[2],lower.tail=T) + pnorm(reject2b[2],xrange,sem[2],lower.tail=F))
+
+
+p.1a = ggplot(data=samdis1)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.2, ymax=y+0.2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject1[1],x,NA), ymin=0.2, ymax=y+0.2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject1[2],x,NA), ymin=0.2, ymax=y+0.2))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1, ymin=0, ymax=y))+
+  geom_segment(aes(x=mu1, xend=mu1, y=max(samdis1$y), yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1>reject1[2],x+mu1,NA), ymin=0, ymax=y))+
+  geom_vline(xintercept=reject1)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims1)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"   (N=15)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
+
+p.2a = ggplot(data=samdis2)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.ora, fill=NA, aes(x=x, ymin=0.32, ymax=y+0.32))+
+  geom_ribbon(size=1, color=NA, fill=col.ora, alpha=filler, aes(x=ifelse(x<reject2[1],x,NA), ymin=0.32, ymax=y+0.32))+
+  geom_ribbon(size=1, color=NA, fill=col.ora, alpha=filler, aes(x=ifelse(x>reject2[2],x,NA), ymin=0.32, ymax=y+0.32))+
+  geom_ribbon(size=1, color=col.ora, fill="white", aes(x=x+mu1, ymin=0, ymax=y))+
+  geom_segment(aes(x=mu1, xend=mu1, y=max(samdis2$y), yend=-0.32), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.ora, alpha=filler, aes(x=ifelse(x+mu1>reject2[2],x+mu1,NA), ymin=0, ymax=y))+
+  geom_vline(xintercept=reject2)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims2)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"   (N=50)")))+
+  annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.32+0.27-1/ratio, ymax=0.32+0.27)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.32+0.27-0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
+  annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.27-1/ratio, ymax=0.27)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.27-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
+
+p.rra = ggplot(rates, aes(x=x))+
+  geom_line(size=1, alpha=filler, color=col.red, aes(y=power.1))+
+  geom_line(size=1, alpha=filler, color=col.ora, aes(y=power.2))+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_vline(xintercept=mu1, linetype="dashed", color="red")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1, xend=xlims[1], y=pow1, yend=pow1), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1, xend=xlims[1], y=pow2, yend=pow2), color="gray60")+
+  geom_hline(yintercept=alpha[1])+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha[1]+0.05, label=expression(alpha==0.05))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name=expression(paste("Rej-Rate(",mu,")")))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.1b = ggplot(data=samdis1)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.red, fill=NA, aes(x=x, ymin=0.2, ymax=y+0.2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x<reject1b[1],x,NA), ymin=0.2, ymax=y+0.2))+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x>reject1b[2],x,NA), ymin=0.2, ymax=y+0.2))+
+  geom_ribbon(size=1, color=col.red, fill="white", aes(x=x+mu1, ymin=0, ymax=y))+
+  geom_segment(aes(x=mu1, xend=mu1, y=max(samdis1$y), yend=-0.2), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.red, alpha=filler, aes(x=ifelse(x+mu1>reject1b[2],x+mu1,NA), ymin=0, ymax=y))+
+  geom_vline(xintercept=reject1b)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims1)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9,color="white"),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"   (N=15)")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste(alpha," = 0.2 = ")))+
+  annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
+
+p.2b = ggplot(data=samdis2)+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_ribbon(size=1, color=col.ora, fill=NA, aes(x=x, ymin=0.32, ymax=y+0.32))+
+  geom_ribbon(size=1, color=NA, fill=col.ora, alpha=filler, aes(x=ifelse(x<reject2b[1],x,NA), ymin=0.32, ymax=y+0.32))+
+  geom_ribbon(size=1, color=NA, fill=col.ora, alpha=filler, aes(x=ifelse(x>reject2b[2],x,NA), ymin=0.32, ymax=y+0.32))+
+  geom_ribbon(size=1, color=col.ora, fill="white", aes(x=x+mu1, ymin=0, ymax=y))+
+  geom_segment(aes(x=mu1, xend=mu1, y=max(samdis2$y), yend=-0.32), linetype="dashed", color="red")+
+  geom_ribbon(size=1, color=NA, fill=col.ora, alpha=filler, aes(x=ifelse(x+mu1>reject2b[2],x+mu1,NA), ymin=0, ymax=y))+
+  geom_vline(xintercept=reject2b)+
+  # Design
+  coord_fixed(ratio=ratio, xlim=xlims, ylim=ylims2)+
+  scale_x_continuous(breaks=xbrks, name="")+
+  scale_y_continuous(breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9,color="white"),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"   (N=50)")))+
+  annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.32+0.27-1/ratio, ymax=0.32+0.27)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.32+0.27-0.5/ratio, label=expression(paste(alpha," = 0.2 = ")))+
+  annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.27-1/ratio, ymax=0.27)+
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.27-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
+
+p.rrb = ggplot(ratesb, aes(x=x))+
+  geom_line(size=1, alpha=filler, color=col.red, aes(y=power.1))+
+  geom_line(size=1, alpha=filler, color=col.ora, aes(y=power.2))+
+  geom_vline(xintercept=0, linetype="dashed")+
+  geom_vline(xintercept=mu1, linetype="dashed", color="red")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1, xend=xlims[1], y=pow1b, yend=pow1b), color="gray60")+
+  geom_segment(arrow=arrow(length=unit(0.2,"cm")), aes(x=mu1, xend=xlims[1], y=pow2b, yend=pow2b), color="gray60")+
+  geom_hline(yintercept=alpha[2])+
+  annotate("text", size=3, hjust=1, vjust=0, x=xlims[2], y=alpha[2]+0.05, label=expression(alpha==0.2))+
+  # Design
+  coord_fixed(ratio=15 ,xlim=xlims, ylim=c(0,1))+
+  scale_x_continuous(breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(breaks=seq(0,1,0.2), name=expression(paste("Rej-Rate(",mu,")")))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_blank(),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+(p.1a / p.2a / p.rra) | (p.1b / p.2b / p.rrb)
+```
+
+```{r rej rate contour alpha}
+xlims=c(-15,15); xbrks=seq(-10,10,10); ylims=c(10,50); ybrks=seq(10,50,10);
+
+mu0=0; sigma=10; alpha=c(0.05,0.01)
+
+x_range = seq(-1.5*sigma,1.5*sigma,0.1)
+n_range = seq(ylims[1],ylims[2],1)
+
+rr1 = matrix(nrow=length(n_range), ncol=length(x_range))
+rr2 = rr1
+
+reject1 = matrix(nrow=2, ncol=length(n_range))
+reject1[1,] = qnorm(alpha[1]/2,mu0,sigma/sqrt(n_range),lower.tail=T)
+reject1[2,] = qnorm(alpha[1]/2,mu0,sigma/sqrt(n_range),lower.tail=F)
+
+reject2 = matrix(nrow=2, ncol=length(n_range))
+reject2[1,] = qnorm(alpha[2]/2,mu0,sigma/sqrt(n_range),lower.tail=T)
+reject2[2,] = qnorm(alpha[2]/2,mu0,sigma/sqrt(n_range),lower.tail=F)
+
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    rr1[n,x] = pnorm(reject1[1,n], x_range[x], sigma/sqrt(n_range[n]), lower.tail=T)+
+               pnorm(reject1[2,n], x_range[x], sigma/sqrt(n_range[n]), lower.tail=F)
+    rr2[n,x] = pnorm(reject2[1,n], x_range[x], sigma/sqrt(n_range[n]), lower.tail=T)+
+               pnorm(reject2[2,n], x_range[x], sigma/sqrt(n_range[n]), lower.tail=F)}}
+
+rr1 = as.vector(rr1); rr2 = as.vector(rr2)
+n   = rep(n_range, length(x_range))
+x   = rep(x_range, each=length(n_range))
+dat = data.frame(x=rep(x,2), n=rep(n,2), rr=c(rr1,rr2),
+                 a=as.factor(rep(alpha, each=length(n))))
+
+dat$a = factor(dat$a, levels=c("0.05","0.01"),
+               labels=c(bquote(alpha==0.05),
+                               bquote(alpha==0.001)))
+
+ggplot(dat, aes(x=x, y=n))+
+  facet_wrap(.~a, labeller=label_parsed)+
+  geom_raster(aes(fill=rr))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Rej-Rate")))+
+  geom_vline(xintercept=mu0, color="white", linetype="dashed")+
+  # Design
+  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(limits=ylims, breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=7),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.8)+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))
+
+```
+
+```{r rej rate contour sigma raw}
+xlims=c(-15,15); xbrks=seq(-10,10,10); ylims=c(10,50); ybrks=seq(10,50,10);
+
+mu0=0; sigma=c(10,20,30); alpha=0.05
+
+x_range = seq(-1.5*max(sigma),1.5*max(sigma),0.1)
+n_range = seq(ylims[1],ylims[2],1)
+
+rr1 = matrix(nrow=length(n_range), ncol=length(x_range))
+rr2 = rr1
+rr3 = rr1
+
+reject1 = matrix(nrow=2, ncol=length(n_range))
+reject1[1,] = qnorm(alpha/2,mu0,sigma[1]/sqrt(n_range),lower.tail=T)
+reject1[2,] = qnorm(alpha/2,mu0,sigma[1]/sqrt(n_range),lower.tail=F)
+
+reject2 = matrix(nrow=2, ncol=length(n_range))
+reject2[1,] = qnorm(alpha/2,mu0,sigma[2]/sqrt(n_range),lower.tail=T)
+reject2[2,] = qnorm(alpha/2,mu0,sigma[2]/sqrt(n_range),lower.tail=F)
+
+reject3 = matrix(nrow=2, ncol=length(n_range))
+reject3[1,] = qnorm(alpha/2,mu0,sigma[3]/sqrt(n_range),lower.tail=T)
+reject3[2,] = qnorm(alpha/2,mu0,sigma[3]/sqrt(n_range),lower.tail=F)
+
+for(x in seq_along(x_range)){
+  for(n in seq_along(n_range)){
+    rr1[n,x] = pnorm(reject1[1,n], x_range[x], sigma[1]/sqrt(n_range[n]), lower.tail=T)+
+               pnorm(reject1[2,n], x_range[x], sigma[1]/sqrt(n_range[n]), lower.tail=F)
+    rr2[n,x] = pnorm(reject2[1,n], x_range[x], sigma[2]/sqrt(n_range[n]), lower.tail=T)+
+               pnorm(reject2[2,n], x_range[x], sigma[2]/sqrt(n_range[n]), lower.tail=F)
+    rr3[n,x] = pnorm(reject3[1,n], x_range[x], sigma[3]/sqrt(n_range[n]), lower.tail=T)+
+               pnorm(reject3[2,n], x_range[x], sigma[3]/sqrt(n_range[n]), lower.tail=F)}}
+
+rr1 = as.vector(rr1); rr2 = as.vector(rr2); rr3 = as.vector(rr3)
+n   = rep(n_range, length(x_range))
+x   = rep(x_range, each=length(n_range))
+dat = data.frame(x=rep(x,3), n=rep(n,3), rr=c(rr1,rr2,rr3),
+                 s=rep(as.factor(sigma), each=length(n)),
+                 sigma=rep(sigma, each=length(n))) %>%
+  rowwise() %>%
+  mutate(xd = x/sigma)
+
+dat$s = factor(dat$s, labels=c(bquote(sigma==10),
+                               bquote(sigma==20),
+                               bquote(sigma==30)))
+
+ggplot(dat, aes(x=x, y=n))+
+  facet_wrap(.~s, labeller=label_parsed)+
+  geom_raster(aes(fill=rr))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Rej-Rate")))+
+  geom_vline(xintercept=mu0, color="white", linetype="dashed")+
+  # Design
+  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
+  scale_y_continuous(limits=ylims, breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=7),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.8)+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"  ...  ",alpha==0.05)))
+
+```
+
+```{r rej rate contour sigma d}
+xlims=c(-1.5,1.5); xbrks=seq(-1,1,1); ylims=c(10,50); ybrks=seq(10,50,10)
+
+ggplot(dat, aes(x=xd, y=n))+
+  facet_wrap(.~s, labeller=label_parsed)+
+  geom_raster(aes(fill=rr))+
+  scale_fill_continuous(type="viridis", name=expression(paste("Rej-Rate")))+
+  geom_vline(xintercept=mu0, color="white", linetype="dashed")+
+  # Design
+  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("Distance from ",mu[0]," / ",sigma)))+
+  scale_y_continuous(limits=ylims, breaks=ybrks, name="")+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=7),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.8)+
+  ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"  ...  ",alpha==0.05)))
+
+```
+
+```{r z statistic, fig.height=3.33}
+N = c(5,15,50); sem = 1/sqrt(N); alpha=0.05; cols=c(col.vio,col.red,col.ora);
+range <- function(mu,sigma,by){x = seq(mu-3.5*sigma, mu+3.5*sigma, by); return(x)}
+
+mean  = rbind(data.frame(x=range(0,sem[1],0.01), n="N = 5" , y=dnorm(range(0,sem[1],0.01),0,sem[1])),
+              data.frame(x=range(0,sem[2],0.01), n="N = 15", y=dnorm(range(0,sem[2],0.01),0,sem[2])),
+              data.frame(x=range(0,sem[3],0.01), n="N = 50", y=dnorm(range(0,sem[3],0.01),0,sem[3])))
+
+sd    = rbind(with(density(replicate(50000, sd(rnorm(N[1])))), data.frame(x,y,n="N = 5" )),
+              with(density(replicate(50000, sd(rnorm(N[2])))), data.frame(x,y,n="N = 15")),
+              with(density(replicate(50000, sd(rnorm(N[3])))), data.frame(x,y,n="N = 50")))
+
+sz = abs(qnorm(pnorm(3.5,lower.tail=F)))
+
+zdist = rbind(data.frame(x=seq(-sz,sz,0.01), n="N = 5" , y=dnorm(seq(-sz,sz,0.01),0,1)),
+              data.frame(x=seq(-sz,sz,0.01), n="N = 15", y=dnorm(seq(-sz,sz,0.01),0,1)),
+              data.frame(x=seq(-sz,sz,0.01), n="N = 50", y=dnorm(seq(-sz,sz,0.01),0,1))) %>%
+  mutate(c = case_when(n=="N = 5"  ~ abs(qnorm(alpha/2)),
+                       n=="N = 15" ~ abs(qnorm(alpha/2)),
+                       n=="N = 50" ~ abs(qnorm(alpha/2))))
+
+st = abs(qt(pnorm(3.5,lower.tail=F),N-1))
+
+tdist = rbind(data.frame(x=seq(-st[1],st[1],0.01), n="N = 5" , y=dt(seq(-st[1],st[1],0.01),N[1]-1)),
+              data.frame(x=seq(-st[2],st[2],0.01), n="N = 15", y=dt(seq(-st[2],st[2],0.01),N[2]-1)),
+              data.frame(x=seq(-st[3],st[3],0.01), n="N = 50", y=dt(seq(-st[3],st[3],0.01),N[3]-1))) %>%
+  mutate(c = case_when(n=="N = 5"  ~ abs(qt(alpha/2,N[1]-1)),
+                       n=="N = 15" ~ abs(qt(alpha/2,N[2]-1)),
+                       n=="N = 50" ~ abs(qt(alpha/2,N[3]-1))))
+
+p.m = ggplot(mean, aes(x=x, y=y, color=n, fill=n))+
+  facet_grid(.~n)+
+  scale_color_manual(values=cols)+
+  scale_fill_manual(values=cols)+
+  geom_area(size=1, fill=NA)+
+  # Design
+  scale_x_continuous(breaks=-1:1, name=expression(paste(frac(m-mu,sigma))))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        legend.position="none",
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.z = ggplot(zdist, aes(x=x, y=y, color=n, fill=n))+
+  facet_grid(.~n)+
+  scale_color_manual(values=cols)+
+  scale_fill_manual(values=cols)+
+  geom_area(size=1, fill=NA)+
+  geom_area(size=1, color=NA, alpha=0.8, aes(y=y, x=ifelse(x < -c, x, NA)))+
+  geom_area(size=1, color=NA, alpha=0.8, aes(y=y, x=ifelse(x > +c, x, NA)))+
+  # Design
+  coord_cartesian(xlim=c(-7,7))+
+  scale_x_continuous(breaks=seq(-6,6,2), name=expression(paste(frac(m-mu,sigma/sqrt(N)))))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        legend.position="none",
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.m / p.z
+```
+
+```{r t statistic, fig.height=5}
+
+p.s = ggplot(sd, aes(x=x, y=y, color=n, fill=n))+
+  facet_grid(.~n)+
+  scale_color_manual(values=cols)+
+  scale_fill_manual(values=cols)+
+  geom_area(size=1, fill=NA)+
+  # Design
+  coord_cartesian(xlim=c(0,2))+
+  scale_x_continuous(breaks=0:2, name=expression(paste(frac(s,sigma))))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        legend.position="none",
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.t = ggplot(tdist, aes(x=x, y=y, color=n, fill=n))+
+  facet_grid(.~n)+
+  scale_color_manual(values=cols)+
+  scale_fill_manual(values=cols)+
+  geom_area(size=1, fill=NA)+
+  geom_area(size=1, color=NA, alpha=0.8, aes(y=y, x=ifelse(x < -c, x, NA)))+
+  geom_area(size=1, color=NA, alpha=0.8, aes(y=y, x=ifelse(x > +c, x, NA)))+
+  # Design
+  coord_cartesian(xlim=c(-7,7))+
+  scale_x_continuous(breaks=seq(-6,6,2), name=expression(paste(frac(m-mu,s/sqrt(N)))))+
+  theme_bw()+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        legend.position="none",
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
+
+p.m / p.s / p.t
+```
+

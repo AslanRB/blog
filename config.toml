@@ -1,13 +1,13 @@
 baseURL = "https://aslanbellmann.netlify.app/"
 languageCode = "en-us"
-title = "Aslan Bellmann"
+title = "Informative Science"
 theme = "minimal"
 disqusShortname = "username" # delete this to disable disqus comments
 googleAnalytics = ""
 
 [params]
     author = "Aslan Bellmann"
-    description = "The future is now if you're moving on a closed time-like loop."
+    description = "Sadly, this is not a tautology (yet)."
     githubUsername = "AslanRB"
     accent = "black"
     showBorder = true
