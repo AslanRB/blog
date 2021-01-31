@@ -22,19 +22,96 @@ col.ora = "#ff6600"
 filler  = 0.65
 ```
 
-```{r coin flips, fig.height=2, fig.width=5}
-set.seed(2020)
-flips = 1000; tails = rbinom(flips,1,0.5); ctails = vector(length=flips)
-for(i in seq_along(tails)){ctails[i] = mean(tails[1:i])}
+```{r probdists unif}
+p.d = data.frame(x = 0:10, y = dunif(0:10,0,10)) %>%
+  ggplot() + theme_bw() +
+  coord_cartesian(xlim=c(-1,11), y=c(0,0.11))+
+  scale_x_continuous(breaks=0:10, name=expression(D))+
+  scale_y_continuous(breaks=c(.05,.1), name=expression(Probability))+
+  geom_segment(aes(x=x, xend=x, y=-1, yend=y), size=1)+
+  ggtitle("Discrete")+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        panel.grid=element_blank())
 
-data.frame(index=1:flips, ctails) %>%
-  ggplot(aes(x=index, y=ctails))+
-  geom_hline(size=0.5, yintercept=0.5, color="red", linetype="dashed")+
-  geom_line(size=0.5, color="black")+
-  scale_x_continuous(name="# Coin Flips", limits=c(1,flips), breaks=c(1,round(flips/2),flips))+
-  scale_y_continuous(name="Proportion Tails", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+p.c = data.frame(x = 0:10, y = dunif(0:10,0,10)) %>%
+  ggplot() + theme_bw() +
+  coord_cartesian(xlim=c(-1,11), y=c(0,0.11))+
+  scale_x_continuous(breaks=0:10, name=expression(C))+
+  scale_y_continuous(breaks=c(.05,.1), name=expression(Probability~Density))+
+  geom_path(aes(x=x, y=y), size=1)+
+  geom_segment(aes(x=0, xend=0, y=-1, yend=0.1), size=0.5)+
+  geom_segment(aes(x=10, xend=10, y=-1, yend=0.1), size=0.5)+
+  ggtitle("Continuous")+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        panel.grid=element_blank())
+  
+p.d | p.c
+```
+
+```{r dice}
+set.seed(2021)
+roll <- function(){d1 = sample(1:6,1); d2 = sample(1:6,1); return((d1+d2) %% 3 == 0)} #T if multiple of 3
+
+reps=10000; outcomes=replicate(reps, roll()); cprob=vector(length=reps)
+for(i in 1:reps) cprob[i] = mean(outcomes[1:i])
+
+data.frame(x=1:800, y=cprob[1:800]) %>%
+  ggplot(aes(x=x, y=y))+
+  geom_hline(yintercept=1/3, color="gray40")+
+  geom_line(size=0.5)+
+  theme_classic()+
+  ggtitle("Throwing 2 Dice")+
+  coord_fixed(xlim=c(1,650), ylim=c(0,1), ratio=200)+
+  scale_x_continuous(name="Throws", breaks=c(1,100,200,300,400,500,600))+
+  scale_y_continuous(name="Proportion Multiples of 3", breaks=seq(0,1,0.2))+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank()) |
+  
+data.frame(x=(reps-200):reps, y=cprob[(reps-200):reps]) %>%
+  ggplot(aes(x=x, y=y))+
+  geom_hline(yintercept=1/3, color="gray40")+
+  geom_line(size=0.5)+
+  theme_classic()+
+  ggtitle("Throwing 2 Dice")+
+  coord_fixed(xlim=c(reps-150,reps+10), ylim=c(0,1), ratio=200)+
+  scale_x_continuous(name="Throws", breaks=c(reps-100,reps))+
+  scale_y_continuous(name="Proportion Multiples of 3")+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(color="white"),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        axis.line.y=element_blank(),
+        panel.grid=element_blank())
+
+```
+
+```{r coin flips, fig.height=5}
+set.seed(2020)
+
+# Plot 1
+flips = 6; outcome = rbinom(flips,1,0.5);
+
+p.11 = data.frame(index=1:flips, outcome) %>%
+  ggplot(aes(x=outcome, y=index))+
+  geom_vline(xintercept=0:1, color="gray90")+
+  geom_point(size=2, shape=21, color="black", fill="black")+
+  scale_y_reverse(name="Repetition #", limits=c(flips,0), breaks=1:flips)+
+  scale_x_continuous(name="k / N", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
   theme_bw()+
-  ggtitle("1000 Coin Flips")+
+  ggtitle("N=1")+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
         strip.background=element_blank(),
@@ -46,19 +123,41 @@ data.frame(index=1:flips, ctails) %>%
         #axis.text.y=element_blank(),
         #axis.title.y=element_blank(),
         panel.grid=element_blank())
-```
 
-```{r coin flips 1, fig.height=2, fig.width=5}
-set.seed(2020)
-flips = 6; outcome = rbinom(flips,1,0.5);
-
-data.frame(index=1:flips, outcome) %>%
-  ggplot(aes(x=index, y=outcome))+
-  geom_point(size=2, shape=21, color="black", fill="black")+
-  scale_x_continuous(name="Run #", limits=c(0,flips), breaks=1:flips)+
-  scale_y_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,1))+
+p.12 = data.frame(x=(0:1)/1, y=dbinom(0:1,1,0.5)) %>%
+  ggplot(aes(x=x, y=y, group=x))+
+  geom_vline(xintercept=0:1, color="gray90")+
+  geom_segment(aes(x=x, xend=x, y=0, yend=y), size=1)+
   theme_bw()+
-  ggtitle("1 Run = 1 Flip")+
+  scale_x_continuous(name="k / N", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  scale_y_continuous(name="Frequency", limits=c(0,0.55), breaks=c(0,0.5))+
+  theme_bw()+
+  ggtitle(expression(paste(infinity," Repetitions")))+
+  theme(axis.title=element_text(size=9),
+        plot.title=element_text(size=9),
+        #axis.ticks.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.title.x=element_blank(),
+        #axis.ticks.y=element_blank(),
+        #axis.text.y=element_blank(),
+        #axis.title.y=element_blank(),
+        panel.grid=element_blank(),
+        aspect.ratio=0.7)
+
+# Plot 2
+flips = 4; runs = 6; outcome = replicate(runs, rbinom(flips,1,0.5)); cprop = index = outcome;
+for(f in 1:flips) for(r in 1:runs) {cprop[f,r] = mean(outcome[1:f,r]); index[f,r] = r + (f-flips)*0.8/flips}
+
+p.21 = data.frame(index=as.vector(index), outcome=as.vector(cprop), run=as.factor(rep(1:runs,each=flips))) %>%
+  ggplot(aes(x=outcome, y=index, group=run))+
+  geom_vline(xintercept=0:flips/flips, color="gray90")+
+  geom_path(size=0.5, color="black")+
+  geom_point(size=1, shape=21, color="black", fill="white")+
+  geom_point(size=2, shape=21, color="black", fill="black", aes(y=ifelse(index%%1==0,index,NA), x=outcome))+
+  scale_y_reverse(name="Repetition #", limits=c(runs,0), breaks=1:runs)+
+  scale_x_continuous(name="k / N", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  theme_bw()+
+  ggtitle("N=4")+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
         strip.background=element_blank(),
@@ -68,18 +167,18 @@ data.frame(index=1:flips, outcome) %>%
         #axis.title.x=element_blank(),
         #axis.ticks.y=element_blank(),
         #axis.text.y=element_blank(),
-        #axis.title.y=element_blank(),
-        panel.grid=element_blank()) |
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
 
-data.frame(x=(0:1)/1, y=dbinom(0:1,1,0.5)) %>%
+p.22 = data.frame(x=(0:flips)/flips, y=dbinom(0:flips,flips,0.5)) %>%
   ggplot(aes(x=x, y=y, group=x))+
-  geom_segment(aes(x=x, xend=x, y=0, yend=y))+
-  coord_flip()+
+  geom_vline(xintercept=0:flips/flips, color="gray90")+
+  geom_segment(aes(x=x, xend=x, y=0, yend=y), size=1)+
   theme_bw()+
-  scale_x_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,1))+
+  scale_x_continuous(name="k / N", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
   scale_y_continuous(name="Frequency", limits=c(0,0.55), breaks=c(0,0.5))+
   theme_bw()+
-  ggtitle(expression(paste(infinity," Runs")))+
+  ggtitle(expression(paste(infinity," Repetitions")))+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
         #axis.ticks.x=element_blank(),
@@ -89,23 +188,22 @@ data.frame(x=(0:1)/1, y=dbinom(0:1,1,0.5)) %>%
         #axis.text.y=element_blank(),
         axis.title.y=element_blank(),
         panel.grid=element_blank(),
-        aspect.ratio=1)
-```
+        aspect.ratio=0.7)
 
-```{r coin flips 5, fig.height=2, fig.width=5}
-set.seed(2020)
+# Plot 3
 flips = 10; runs = 6; outcome = replicate(runs, rbinom(flips,1,0.5)); cprop = index = outcome;
 for(f in 1:flips) for(r in 1:runs) {cprop[f,r] = mean(outcome[1:f,r]); index[f,r] = r + (f-flips)*0.8/flips}
 
-data.frame(index=as.vector(index), outcome=as.vector(cprop), run=as.factor(rep(1:runs,each=flips))) %>%
-  ggplot(aes(x=index, y=outcome, group=run))+
-  geom_line(size=0.5, color="black")+
+p.31 = data.frame(index=as.vector(index), outcome=as.vector(cprop), run=as.factor(rep(1:runs,each=flips))) %>%
+  ggplot(aes(x=outcome, y=index, group=run))+
+  geom_vline(xintercept=0:flips/flips, color="gray90")+
+  geom_path(size=0.5, color="black")+
   geom_point(size=1, shape=21, color="black", fill="white")+
-  geom_point(size=2, shape=21, color="black", fill="black", aes(x=ifelse(index%%1==0,index,NA), y=outcome))+
-  scale_x_continuous(name="Run #", limits=c(0,runs), breaks=1:runs)+
-  scale_y_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  geom_point(size=2, shape=21, color="black", fill="black", aes(y=ifelse(index%%1==0,index,NA), x=outcome))+
+  scale_y_reverse(name="Repetition #", limits=c(runs,0), breaks=1:runs)+
+  scale_x_continuous(name="k / N", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
   theme_bw()+
-  ggtitle("1 Run = 10 Flips")+
+  ggtitle("N=10")+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
         strip.background=element_blank(),
@@ -115,18 +213,18 @@ data.frame(index=as.vector(index), outcome=as.vector(cprop), run=as.factor(rep(1
         #axis.title.x=element_blank(),
         #axis.ticks.y=element_blank(),
         #axis.text.y=element_blank(),
-        #axis.title.y=element_blank(),
-        panel.grid=element_blank()) |
+        axis.title.y=element_blank(),
+        panel.grid=element_blank())
 
-data.frame(x=(0:flips)/flips, y=dbinom(0:flips,flips,0.5)) %>%
+p.32 = data.frame(x=(0:flips)/flips, y=dbinom(0:flips,flips,0.5)) %>%
   ggplot(aes(x=x, y=y, group=x))+
-  geom_segment(aes(x=x, xend=x, y=0, yend=y))+
-  coord_flip()+
+  geom_vline(xintercept=0:flips/flips, color="gray90")+
+  geom_segment(aes(x=x, xend=x, y=0, yend=y), size=1)+
   theme_bw()+
-  scale_x_continuous(name="Proportion Tails per Run", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
+  scale_x_continuous(name="k / N", limits=c(-0.1,1.1), breaks=c(0,0.5,1))+
   scale_y_continuous(name="Frequency", limits=c(0,0.55), breaks=c(0,0.5))+
   theme_bw()+
-  ggtitle(expression(paste(infinity," Runs")))+
+  ggtitle(expression(paste(infinity," Repetitions")))+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
         #axis.ticks.x=element_blank(),
@@ -136,7 +234,12 @@ data.frame(x=(0:flips)/flips, y=dbinom(0:flips,flips,0.5)) %>%
         #axis.text.y=element_blank(),
         axis.title.y=element_blank(),
         panel.grid=element_blank(),
-        aspect.ratio=1)
+        aspect.ratio=0.7)
+
+((p.11 / p.12) | (p.21 / p.22) | (p.31 / p.32)) +
+  plot_annotation(subtitle = "Process: N coin flips -- Outcome: k Heads / N") &
+  theme(text = element_text(size=9))
+
 ```
 
 ```{r inference, fig.height=2.5, fig.width=5.5} 
@@ -242,7 +345,7 @@ ggplot(mapping=aes(x=x,y=y))+
   )+
   
   annotate("rect", xmin=-35, xmax=-32, ymin=0.04, ymax=0.10, size=1, color="gray70", fill="gray70", alpha=0.2)+
-  annotate("text", hjust=0, vjust=0.5, x=-31, y=0.07, size=3, label=expression(paste("Normal (",mu,", ",sigma,")")))+
+  annotate("text", hjust=0, vjust=0.5, x=-31, y=0.07, size=3, label=expression(paste("Normal (",mu,", ",sigma^2,")")))+
   annotate("text", hjust=0, vjust=0, x=-35, y=0.12, size=3, label=expression(bold("Population")))+
   
   annotate("rect", xmin=-35, xmax=-32, ymin=0.18, ymax=0.24, size=1, color=col.ora, fill=NA, alpha=0.2)+
@@ -256,7 +359,7 @@ ggplot(mapping=aes(x=x,y=y))+
   geom_segment(aes(x=-23, xend=-23, y=0.17, yend=0.40))+
   geom_segment(aes(x=-24, xend=-23, y=0.17, yend=0.17))+
   geom_segment(aes(x=-24, xend=-23, y=0.40, yend=0.40))+
-  annotate("text", hjust=0, vjust=0.5, x=-22, y=0.29, size=3, label=expression(paste("Normal (",mu,", ",sigma/sqrt(N),")")))
+  annotate("text", hjust=0, vjust=0.5, x=-22, y=0.29, size=3, label=expression(paste("Normal (",mu,", ",sigma^2/N,")")))
 
 ```
 
@@ -1556,7 +1659,7 @@ p.1a = ggplot(data=samdis1)+
   annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
   annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
   annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
-  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste(1-beta(4)," = ")))
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
 
 p.2a = ggplot(data=samdis2)+
   geom_vline(xintercept=0, linetype="dashed")+
@@ -1585,7 +1688,7 @@ p.2a = ggplot(data=samdis2)+
   annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.32+0.27-1/ratio, ymax=0.32+0.27)+
   annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.32+0.27-0.5/ratio, label=expression(paste(alpha," = 0.05 = ")))+
   annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.27-1/ratio, ymax=0.27)+
-  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.27-0.5/ratio, label=expression(paste(1-beta(4)," = ")))
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.27-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
 
 p.rra = ggplot(rates, aes(x=x))+
   geom_line(size=1, alpha=filler, color=col.red, aes(y=power.1))+
@@ -1638,7 +1741,7 @@ p.1b = ggplot(data=samdis1)+
   annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.2+0.15-1/ratio, ymax=0.2+0.15)+
   annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.2+0.15-0.5/ratio, label=expression(paste(alpha," = 0.2 = ")))+
   annotate("rect", size=1, col=col.red, fill=col.red, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.15-1/ratio, ymax=0.15)+
-  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste(1-beta(4)," = ")))
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.15-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
 
 p.2b = ggplot(data=samdis2)+
   geom_vline(xintercept=0, linetype="dashed")+
@@ -1667,7 +1770,7 @@ p.2b = ggplot(data=samdis2)+
   annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.32+0.27-1/ratio, ymax=0.32+0.27)+
   annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.32+0.27-0.5/ratio, label=expression(paste(alpha," = 0.2 = ")))+
   annotate("rect", size=1, col=col.ora, fill=col.ora, alpha=filler, xmin=xlims[2]-1, xmax=xlims[2], ymin=0.27-1/ratio, ymax=0.27)+
-  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.27-0.5/ratio, label=expression(paste(1-beta(4)," = ")))
+  annotate("text", size=3, hjust=1, vjust=0.5, x=xlims[2]-1, y=0.27-0.5/ratio, label=expression(paste(1-beta(mu[0]+4)," = ")))
 
 p.rrb = ggplot(ratesb, aes(x=x))+
   geom_line(size=1, alpha=filler, color=col.red, aes(y=power.1))+
@@ -1738,7 +1841,7 @@ ggplot(dat, aes(x=x, y=n))+
   scale_fill_continuous(type="viridis", name=expression(paste("Rej-Rate")))+
   geom_vline(xintercept=mu0, color="white", linetype="dashed")+
   # Design
-  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste(X-mu[0])))+
+  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
   scale_y_continuous(limits=ylims, breaks=ybrks, name="")+
   theme_bw()+
   theme(axis.title=element_text(size=9),
@@ -1754,7 +1857,6 @@ ggplot(dat, aes(x=x, y=n))+
         panel.grid=element_blank(),
         aspect.ratio=0.8)+
   ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0])))
-
 
 ```
 
@@ -1810,7 +1912,7 @@ ggplot(dat, aes(x=x, y=n))+
   scale_fill_continuous(type="viridis", name=expression(paste("Rej-Rate")))+
   geom_vline(xintercept=mu0, color="white", linetype="dashed")+
   # Design
-  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste(X-mu[0])))+
+  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("Distance from ",mu[0])))+
   scale_y_continuous(limits=ylims, breaks=ybrks, name="")+
   theme_bw()+
   theme(axis.title=element_text(size=9),
@@ -1838,7 +1940,7 @@ ggplot(dat, aes(x=xd, y=n))+
   scale_fill_continuous(type="viridis", name=expression(paste("Rej-Rate")))+
   geom_vline(xintercept=mu0, color="white", linetype="dashed")+
   # Design
-  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("(",X-mu[0],")/",sigma)))+
+  scale_x_continuous(limits=xlims, breaks=xbrks, name=expression(paste("Distance from ",mu[0]," / ",sigma)))+
   scale_y_continuous(limits=ylims, breaks=ybrks, name="")+
   theme_bw()+
   theme(axis.title=element_text(size=9),
@@ -1854,6 +1956,7 @@ ggplot(dat, aes(x=xd, y=n))+
         panel.grid=element_blank(),
         aspect.ratio=0.8)+
   ggtitle(expression(paste(H[0],": ",mu==mu[0],",  ",H[1],": ",mu!=mu[0],"  ...  ",alpha==0.05)))
+
 ```
 
 ```{r z statistic, fig.height=3.33}
