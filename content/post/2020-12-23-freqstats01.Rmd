@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo=F, message=F, warning=F,
                       fig.align="center", fig.width=5, fig.height=2)
 
 # Packages
-library(knitr); library(tidyverse); library(patchwork);
+library(knitr); library(tidyverse); library(patchwork); library(ggforce)
 
 # Colors
 col.red = "#800000"
@@ -22,13 +22,48 @@ col.ora = "#ff6600"
 filler  = 0.65
 ```
 
+$\mathbb{R}$ Did this work???
+
+```{r sample space}
+p.d = ggplot() + theme_void () + coord_fixed(ratio=0.5) +
+  geom_rect(aes(xmin=0, xmax=1, ymin=0, ymax=1), col="black", fill=NA, size=1) +
+  geom_point(aes(x=0.5:9.5/10, y=0.5), shape=21, col="gray50", fill="gray50", size=2) +
+  geom_segment(aes(x=1:9/10, xend=1:9/10, y=0, yend=1))+
+  ggtitle("  Discrete r.v.")+
+  annotate("text", label="1", hjust=0.5, vjust=1, x=0.05, y=0.4, size=4)+
+  annotate("text", label="2", hjust=0.5, vjust=1, x=0.15, y=0.4, size=4)+
+  annotate("text", label="3", hjust=0.5, vjust=1, x=0.25, y=0.4, size=4)+
+  annotate("text", label="4", hjust=0.5, vjust=1, x=0.35, y=0.4, size=4)+
+  annotate("text", label="5", hjust=0.5, vjust=1, x=0.45, y=0.4, size=4)+
+  annotate("text", label="6", hjust=0.5, vjust=1, x=0.55, y=0.4, size=4)+
+  annotate("text", label="7", hjust=0.5, vjust=1, x=0.65, y=0.4, size=4)+
+  annotate("text", label="8", hjust=0.5, vjust=1, x=0.75, y=0.4, size=4)+
+  annotate("text", label="9", hjust=0.5, vjust=1, x=0.85, y=0.4, size=4)+
+  annotate("text", label="10", hjust=0.5, vjust=1, x=0.95, y=0.4, size=4)+
+  theme(text=element_text(size=9))
+
+p.c = ggplot() + theme_void () + coord_fixed(ratio=0.5) +
+  geom_segment(aes(x=0, xend=1, y=0.5, yend=0.5), col="gray50", size=2) +
+  geom_rect(aes(xmin=0, xmax=1, ymin=0, ymax=1), col="black", fill=NA, size=1)+
+  ggtitle("  Continuous r.v.")+
+  geom_segment(aes(x=0, xend=0.03, y=0.5, yend=0.4))+
+  geom_segment(aes(x=1, xend=0.97, y=0.5, yend=0.4))+
+  annotate("text", label="0", hjust=0, vjust=1, x=0.03, y=0.4, size=4)+
+  annotate("text", label="10", hjust=1, vjust=1, x=0.97, y=0.4, size=4)+
+  #geom_segment(aes(x=0.1, xend=0.87, y=0.35, yend=0.35))+
+  theme(text=element_text(size=9))
+
+p.d | p.c
+```
+
 ```{r probdists unif}
-p.d = data.frame(x = 0:10, y = dunif(0:10,0,10)) %>%
+p.d = data.frame(x = 1:10, y = dunif(1:10,0,10)) %>%
   ggplot() + theme_bw() +
-  coord_cartesian(xlim=c(-1,11), y=c(0,0.11))+
-  scale_x_continuous(breaks=0:10, name=expression(D))+
-  scale_y_continuous(breaks=c(.05,.1), name=expression(Probability))+
-  geom_segment(aes(x=x, xend=x, y=-1, yend=y), size=1)+
+  coord_cartesian(xlim=c(0,11), y=c(0,0.11))+
+  scale_x_continuous(breaks=1:10, name=expression(D))+
+  scale_y_continuous(breaks=c(0,.1), name=expression(Probability))+
+  geom_segment(aes(x=x, xend=x, y=0, yend=y), size=1)+
+  geom_segment(aes(x=-10, xend=20, y=0, yend=0), linetype="dotted")+
   ggtitle("Discrete")+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
@@ -38,10 +73,13 @@ p.c = data.frame(x = 0:10, y = dunif(0:10,0,10)) %>%
   ggplot() + theme_bw() +
   coord_cartesian(xlim=c(-1,11), y=c(0,0.11))+
   scale_x_continuous(breaks=0:10, name=expression(C))+
-  scale_y_continuous(breaks=c(.05,.1), name=expression(Probability~Density))+
+  scale_y_continuous(breaks=c(0,.1), name=expression(Probability~Density))+
   geom_path(aes(x=x, y=y), size=1)+
-  geom_segment(aes(x=0, xend=0, y=-1, yend=0.1), size=0.5)+
-  geom_segment(aes(x=10, xend=10, y=-1, yend=0.1), size=0.5)+
+  geom_path(aes(x=-10:0, y=0), size=1)+
+  geom_path(aes(x=10:20, y=0), size=1)+
+  geom_segment(aes(x=0, xend=0, y=0, yend=0.1), size=0.5)+
+  geom_segment(aes(x=10, xend=10, y=0, yend=0.1), size=0.5)+
+  geom_segment(aes(x=-10, xend=20, y=0, yend=0), linetype="dotted")+
   ggtitle("Continuous")+
   theme(axis.title=element_text(size=9),
         plot.title=element_text(size=9),
@@ -50,7 +88,33 @@ p.c = data.frame(x = 0:10, y = dunif(0:10,0,10)) %>%
 p.d | p.c
 ```
 
-```{r dice}
+```{r LLN}
+set.seed(2021)
+n = 650; coins = 5
+flips = replicate(rbinom(n,1,.5), n=coins)
+chead = flips
+for(i in 1:coins){
+  for(j in 1:n){
+    chead[j,i] = mean(flips[1:j,i])
+  }
+}
+
+data.frame(chead = as.vector(chead),
+           coin  = as.factor(rep(1:coins, each=n)),
+           flip  = rep(1:n, coins)) %>%
+  
+  ggplot(aes(x=flip, y=chead, group=coin)) + theme_bw() +
+  coord_cartesian(xlim=c(1,n-50), ylim=c(0,1))+
+  scale_x_continuous(breaks=c(1,seq(100,n-50,100)), name="Number of Tosses")+
+  scale_y_continuous(breaks=seq(0,1,0.5), name="Running Proportion Heads")+
+  geom_path(color="gray50") +
+  geom_hline(yintercept=0.5, linetype="longdash", color="darkred") +
+  theme(text=element_text(size=9),
+        panel.grid=element_blank())
+
+```
+
+```{r dice, eval=F}
 set.seed(2021)
 roll <- function(){d1 = sample(1:6,1); d2 = sample(1:6,1); return((d1+d2) %% 3 == 0)} #T if multiple of 3
 
